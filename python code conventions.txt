@@ -1,0 +1,1685 @@
+# Python Code Conventions
+
+#### We use standardized code conventions to ensure uniformity across all Cortex XSOAR Integrations.
+
+#### This section outlines our code conventions.
+
+#### New integrations and scripts should follow these conventions. When working on small fixes and
+
+#### modifications to existing code, follow the conventions used in the existing code.
+
+#### Note: Cortex XSOAR supports also JavaScript integrations and scripts. Our preferred development
+
+#### language is Python, and all new integrations and scripts should be developed in Python, which also
+
+#### provides a wider set of capabilities compared to the available JavaScript support. Simple scripts
+
+#### may still be developed in JavaScript using the conventions provided by the default script template
+
+#### used in the Cortex XSOAR IDE.
+
+## Example Code and Templates
+
+#### For an example of a Hello World integration see HelloWorld.
+
+#### For quick starts templates see Templates directory.
+
+## Python 2 vs 3
+
+#### All new integrations and scripts should be written in Python 3. Python 2 is supported only for existing
+
+#### integrations and scripts.
+
+## Imports
+
+#### You define imports and disable insecure warning at the top of the file.
+
+```
+import demistomock as demisto
+from CommonServerPython import *
+from CommonServerUserPython import *
+''' IMPORTS '''
+```
+
+## Constants
+
+#### You define constants in the file below the imports. It is important that you do not define global
+
+#### variables in the constants section.
+
+#### IMPORTANT : The example below shows the incorrect way to name constants.
+
+## Main function
+
+#### These are the best practices for defining the Main function.
+
+#### i. Create the main function and in the main extract all the integration parameters.
+
+#### ii. Implement the _command function for each integration command (e.g.,
+
+#### say_hello_command(client, demisto.args()))
+
+#### iii. To properly handle exceptions, wrap the commands with try/except in the main. The
+
+#### return_error() function receives error message and returns error entry back into Cortex
+
+#### XSOAR. It will also print the full error to the Cortex XSOAR logs.
+
+#### iv. For logging, use the demisto.debug("write some log here") function.
+
+#### v. In the main function, initialize the Client instance, and pass that client to _command functions.
+
+```
+import json
+import urllib
+```
+```
+# Disable insecure warnings
+urllib3.disable_warnings()
+```
+##### ''' CONSTANTS '''
+
+```
+DATE_FORMAT ="%Y-%m-%dT%H:%M:%SZ"
+```
+```
+apiVersion ="v1"
+url = demisto.params().get("url")
+```
+```
+def main():
+"""
+```
+
+##### PARSE AND VALIDATE INTEGRATION PARAMS
+
+##### """
+
+```
+params = demisto.params()
+username = params.get('credentials', {}).get('identifier')
+password = params.get('credentials', {}).get('password')
+```
+```
+# Remove trailing slash to prevent wrong URL path to service
+base_url = urljoin(params['url'], '/api/v1/suffix')
+```
+```
+verify_certificate = not params.get('insecure', False)
+```
+```
+# How many time before the first fetch to retrieve incidents
+first_fetch_time = params.get('fetch_time','3 days').strip()
+```
+```
+proxy = params.get('proxy',False)
+```
+```
+command = demisto.command()
+demisto.debug(f'Command being called is {command}')
+try :
+client = Client(
+base_url=base_url,
+verify=verify_certificate,
+auth=(username, password),
+proxy=proxy)
+```
+```
+if command == 'test-module':
+# This is the call made when pressing the integration Test button.
+result = test_module(client)
+return_results(result)
+```
+_elif_ command == 'fetch-incidents':
+_# Set and define the fetch incidents command to run after activated via
+integration settings._
+next_run, incidents = fetch_incidents(
+client=client,
+last_run=demisto.getLastRun(),
+first_fetch_time=first_fetch_time)
+
+```
+demisto.setLastRun(next_run)
+demisto.incidents(incidents)
+```
+```
+elif command == 'helloworld-say-hello':
+return_results(say_hello_command(client, demisto.args()))
+```
+```
+# Log exceptions
+except Exception as e:
+return_error(f'Failed to execute {command} command. Error: {str(e)}')
+```
+
+## Client class
+
+#### These are the best practices for defining the Client class.
+
+#### i. Client should inherit from BaseClient. BaseClient defined in CommonServerPython.
+
+#### ii. Client is necessary in order to prevent passing arguments from one function to another function,
+
+#### and to prevent using global variables.
+
+#### iii. Client will contain the _http_request function.
+
+#### iv. Client will implement the 3rd party service API.
+
+#### v. Client will contain all the necessary params to establish connection and authentication with the
+
+#### 3rd party API.
+
+```
+if __name__ in ('__main__','__builtin__','builtins'):
+main()
+```
+```
+class Client(BaseClient):
+"""
+Client will implement the service API, should not contain Cortex XSOAR logic.
+Should do requests and return data
+"""
+```
+```
+def get_ip_reputation(self, ip:str) -> Dict[str, Any]:
+"""Gets the IP reputation using the '/ip' API endpoint
+```
+```
+:type ip: ``str``
+:param ip: IP address to get the reputation for
+```
+```
+:return: dict containing the IP reputation as returned from the API
+:rtype: ``Dict[str, Any]``
+"""
+```
+```
+return self._http_request(
+method='GET',
+url_suffix=f'/ip',
+params={
+'ip': ip
+}
+)
+```
+```
+def get_alert(self, alert_id:str)-> Dict[str, Any]:
+"""Gets a specific HelloWorld alert by id
+```
+
+#### Example - client instance using API KEY
+
+#### Example - client instance using Basic Authentication
+
+```
+:type alert_id: ``str``
+:param alert_id: id of the alert to return
+```
+```
+:return: dict containing the alert as returned from the API
+:rtype: ``Dict[str, Any]``
+"""
+```
+```
+return self._http_request(
+method='GET',
+url_suffix=f'/get_alert_details',
+params={
+'alert_id': alert_id
+}
+)
+```
+```
+api_key = demisto.params().get('apikey')
+```
+```
+# get the service API url
+base_url = urljoin(demisto.params()['url'], '/api/v1')
+```
+```
+# if your Client class inherits from BaseClient, SSL verification is
+# handled out of the box by it, just pass ``verify_certificate`` to
+# the Client constructor
+verify_certificate = not demisto.params().get('insecure',False)
+```
+```
+headers ={
+'Authorization':f'Bearer {api_key}'
+}
+```
+```
+client = Client(
+base_url=base_url,
+verify=verify_certificate,
+headers=headers,
+proxy=proxy
+)
+```
+```
+username = demisto.params().get('credentials', {}).get('identifier')
+password = demisto.params().get('credentials', {}).get('password')
+```
+
+### HTTP Call Retries
+
+#### We do not allow using sleep in the code as it might lead to performance issues. Instead, you can
+
+#### utilize the retry mechanism implemented in the BaseClient by using the retries and
+
+#### backoff_factor arguments of the _http_request function.
+
+## Command Functions
+
+#### These are the best practices for defining the command functions.
+
+#### i. Each integration command should have a corresponding _command function.
+
+#### ii. Each _command function should use Client class functions.
+
+#### iii. Each _command function should be unit testable. This means you should avoid using global
+
+#### functions, such as demisto.results(), return_error(), or return_results().
+
+#### iv. The _command function will receive client instance and args (demisto.args()
+
+#### dictionary).
+
+#### v. The _command function will return an instance of the CommandResults class.
+
+#### vi. To return results to the War Room, in the main use
+
+#### return_results(say_hello_command(client, demisto.args())).
+
+```
+# get the service API url
+base_url = urljoin(demisto.params()['url'], '/api/v1')
+```
+```
+# if your Client class inherits from BaseClient, SSL verification is
+# handled out of the box by it, just pass ``verify_certificate`` to
+# the Client constructor
+verify_certificate = not demisto.params().get('insecure',False)
+```
+```
+client = Client(
+base_url=base_url,
+verify=verify_certificate,
+auth=(username, password),
+proxy=proxy
+)
+```
+```
+def say_hello_command(client, args):
+"""
+Returns Hello {somename}
+```
+
+```
+Args:
+client: HelloWorld client
+args: all command arguments
+```
+```
+Returns:
+Hello {someone}
+```
+```
+readable_output: This will be presented in Warroom - should be in markdown
+syntax - human readable
+outputs: Dictionary/JSON - saved in incident context in order to be used as
+input for other tasks in the
+playbook
+raw_response: Used for debugging/troubleshooting purposes - will be shown
+only if the command executed with
+raw-response=true
+"""
+name = args.get('name')
+```
+```
+result = client.say_hello(name)
+```
+_# readable output will be in markdown format - https://www.markdownguide.org/
+basic-syntax/_
+readable_output = f'## {result}'
+outputs ={
+'name': name,
+'hello': result
+}
+
+```
+results = CommandResults(
+outputs_prefix='HelloWorld.Result',
+outputs_key_field='name',
+outputs=outputs,
+```
+```
+readable_output=readable_output,
+raw_response=result
+)
+```
+```
+return results
+```
+_def_ main():
+"""
+SOME CODE HERE...
+"""
+_try_ :
+client = Client(
+base_url=server_url,
+verify=verify_certificate,
+
+
+## IOC Reputation Commands
+
+#### There are two implementation requirements for reputation commands (aka !file, !email,!
+
+#### domain, !url, and !ip) that are enforced by checks in the demisto-sdk.
+
+#### i. The reputation command's argument of the same name must have default set to True.
+
+#### ii. The reputation command's argument of the same name must have isArray set to True.
+
+#### For more details on these two command argument properties look at the yaml-file-integration in our
+
+#### docs folder.
+
+## test-module
+
+#### i. When users click the Test button, the test-module will execute when the Test button pressed
+
+#### in the integration instance setting page.
+
+#### ii. If the test module returns the string "ok" then the test will be green (success). All other string
+
+#### will be red.
+
+```
+auth=(username, password),
+proxy=proxy)
+```
+```
+"""
+SOME CODE HERE...
+"""
+if demisto.command() == 'helloworld-say-hello':
+return_results(say_hello_command(client, demisto.args()))
+```
+```
+# Log exceptions
+except Exception as e:
+return_error(f'Failed to execute {demisto.command()} command. Error:
+{str(e)}')
+```
+```
+if demisto.command() == 'test-module':
+# This is the call made when pressing the integration Test button.
+result = test_module(client)
+return_results(result)
+```
+```
+def test_module(client):
+```
+
+## fetch-incidents
+
+#### These are the best practices for defining fetch-incidents.
+
+#### i. The fetch-incidents function will be executed when the Fetch incidents checkbox is selected
+
+#### in the integration settings. This function will be executed periodically.
+
+#### ii. The fetch-incidents function must be unit testable.
+
+#### iii. Should receive the last_run param instead of executing the demisto.getLastRun() function.
+
+#### iv. Should return next_run back to main, instead of executing demisto.setLastRun() inside the
+
+#### fetch_incidents function.
+
+#### v. Should return incidents back to main instead of executing demisto.incidents() inside the
+
+#### fetch_incidents function.
+
+##### """
+
+```
+Returning 'ok' indicates that the integration works like it suppose to.
+Connection to the service is successful.
+```
+```
+Args:
+client: HelloWorld client
+```
+```
+Returns:
+'ok' if test passed, anything else will fail the test
+"""
+```
+```
+result = client.say_hello('DBot')
+if 'Hello DBot'== result:
+return 'ok'
+else :
+return 'Test failed because ......'
+```
+```
+def fetch_incidents(client, last_run, first_fetch_time):
+"""
+This function will execute each interval (default is 1 minute).
+```
+```
+Args:
+client: HelloWorld client
+last_run: The greatest incident created_time we fetched from last fetch
+first_fetch_time: If last_run is None then fetch all incidents since
+first_fetch_time
+```
+```
+Returns:
+next_run: This will be last_run in the next fetch-incidents
+```
+
+```
+incidents: Incidents that will be created in Cortex XSOAR
+"""
+# Get the last fetch time, if exists
+last_fetch = last_run.get('last_fetch')
+```
+```
+# Handle first time fetch
+if last_fetch is None:
+last_fetch, _ = dateparser.parse(first_fetch_time)
+else :
+last_fetch = dateparser.parse(last_fetch)
+```
+```
+latest_created_time = last_fetch
+incidents = []
+items = client.list_incidents()
+for item in items:
+incident_created_time = dateparser.parse(item['created_time'])
+incident = {
+'name': item['description'],
+'occurred': incident_created_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+'rawJSON': json.dumps(item)
+}
+```
+```
+incidents.append(incident)
+```
+```
+# Update last run and add incident if the incident is newer than last fetch
+if incident_created_time > latest_created_time:
+latest_created_time = incident_created_time
+```
+next_run ={'last_fetch': latest_created_time.strftime(DATE_FORMAT)}
+_return_ next_run, incidents
+
+_def_ main():
+"""
+SOME CODE HERE
+"""
+_try_ :
+client = Client(
+base_url=server_url,
+verify=verify_certificate,
+auth=(username, password),
+proxy=proxy)
+
+_if_ demisto.command() == 'fetch-incidents':
+_# Set and define the fetch incidents command to run after activated via
+integration settings._
+next_run, incidents = fetch_incidents(
+client=client,
+last_run=demisto.getLastRun(),
+
+
+## Exceptions and Errors
+
+#### These are the best practices for defining the exceptions and errors.
+
+#### i. To avoid unexpected issues, it is important to wrap your command block in a "Try-Catch". See
+
+#### the example below.
+
+#### ii. Raise exceptions in the code where needed, but in the main catch them and use the
+
+#### return_error function. This will enable acceptable error messages in the War Room, instead
+
+#### of stack trace.
+
+#### iii. If the return_error second argument is error, you can pass Exception object.
+
+#### iv. You can always use demisto.error("some error message") to log your error.
+
+## Unit Tests
+
+#### Every integration command must be covered with a unit test. Unit tests should be documented using
+
+```
+first_fetch_time=first_fetch_time)
+```
+```
+demisto.setLastRun(next_run)
+demisto.incidents(incidents)
+```
+```
+# Log exceptions
+except Exception as e:
+return_error(f'Failed to execute {demisto.command()} command. Error:
+{str(e)}')
+```
+```
+def main():
+try :
+if demisto.command() == 'test-module':
+test_get_session()
+return_results('ok')
+```
+```
+if demisto.command() == 'atd-login':
+return_results(get_session_command(client, demisto.args()))
+```
+```
+except Exception as e:
+return_error(f'Failed to execute {demisto.command()} command. Error:
+{str(e)}')
+```
+
+#### Given-When-Then.
+
+#### i. Unit tests must be in a separate file, which should have the same name as the integration but
+
+#### be appended with _test.py for example HelloWorld_test.py
+
+#### ii. To mock http requests use requests_mock.
+
+#### iii. For mocks use mocker.
+
+#### For example:
+
+```
+from HelloWorld import Client, say_hello_command, say_hello_over_http_command
+```
+```
+def test_say_hello():
+"""
+Given
+A name to say hello to
+When
+Calling say_hello_command
+Then
+Make sure the outputs, outputs_prefix and outputs_key_field values are as
+expected.
+"""
+```
+```
+client = Client(
+base_url="https://test.com",
+verify=False,
+auth=("test", "test"),
+proxy=False)
+```
+```
+args = {
+"name": "DBot"
+}
+results = say_hello_command(client, args)
+```
+```
+assert results.outputs == {
+'name': 'DBot',
+'hello':"Hello DBot"
+}
+assert results.outputs_prefix == 'HelloWorld.Result'
+assert results.outputs_key_field == 'name'
+```
+```
+def test_say_hello_over_http(requests_mock):
+"""
+Given
+```
+
+## Variable Naming
+
+#### When naming variables, use [snake_case]([url](https://en.wikipedia.org/wiki/Snake_case)),
+
+#### not PascalCase or camelCase.
+
+## Outputs
+
+#### Make sure you read and understand Context and Outputs.
+
+#### Make sure you follow our context standards when naming indicator outputs.
+
+```
+A name to say hello to
+When
+Calling say_hello_over_http_command
+Then
+Make sure the outputs, outputs_prefix and outputs_key_field values are as
+expected.
+"""
+```
+```
+mock_response ={"result":"Hello DBot"}
+requests_mock.get("https://test.com/api/v1/suffix/hello/Dbot",
+json=mock_response)
+```
+```
+client = Client(
+base_url="https://test.com",
+verify=False,
+auth=("test", "test"),
+proxy=False)
+```
+```
+args = {
+'name': 'DBot'
+}
+results = say_hello_over_http_command(client, args)
+```
+```
+assert results.outputs == {
+'name': 'DBot',
+'hello':'Hello DBot'
+}
+assert results.outputs_prefix == 'HelloWorld.Result'
+assert results.outputs_key_field == 'name'
+```
+
+#### Linking Context
+
+#### Wherever possible, we try to link context together. This will prevent a command from overwriting
+
+#### existing data, or from creating duplicate entries in the context. To do this, observe the following:
+
+#### In this instance, the val.URL && val.URL == obj.URL links together the results retrieved from this
+
+#### integration with results already in the context where the value of the URL is the same. For more
+
+#### information about the syntax of linking and Cortex XSOAR Transform Language in general have a
+
+#### look here
+
+## Logging
+
+#### In some cases, it may be necessary to pass information to the logs to assist future debugging.
+
+#### First, we need to ensure that the debug level logging is enabled. Go to Settings -> About ->
+
+#### Troubleshooting and select Debug for Log Level.
+
+#### To post to the logs, we use the following:
+
+#### You can also use the @logger decorator in Cortex XSOAR. When the decorator is placed at the top
+
+#### of each function, the logger will print the function name as well as all of the argument values to the
+
+#### LOG.
+
+```
+ec = ({
+'URLScan(val.URL && val.URL == obj.URL)': cont_array,
+'URL': url_array,
+'IP': ip_array,
+'Domain': dom_array
+})
+```
+```
+demisto.debug('DEBUG level - This is some information we want in the logs')
+demisto.info('INFO level - This is some information we want in the logs')
+demisto.error('ERROR level - This is some information we want in the logs')
+```
+```
+@logger
+def get_ip(ip):
+ip_data = http_request('POST','/v1/api/ip'+ ip)
+return ip_data
+```
+
+#### Note: These logging methods replace the deprecated LOG() function.
+
+## Do Not Print Sensitive Data to the Log
+
+#### This section is critical. When an integration is ready to be used as part of a public release (meaning
+
+#### you are done debugging it), we ALWAYS remove print statements that are not absolutely necessary.
+
+## Dates
+
+#### We do not use epoch time for customer facing results (Context, Human Readable, etc.). If the API
+
+#### you are working with requires the time format to be in epoch, then convert the date string into epoch
+
+#### as needed. Where possible, use the human readable format of the date %Y-%m-%dT%H:%M:%S
+
+#### Note: If the response returned is in epoch, it is a best practice to convert it to %Y-%m-%dT%H:%M:%S.
+
+## Pagination in Integration Commands
+
+#### When working on a command that supports pagination (usually has API parameters like page and/
+
+#### or page size) with a maximal page size enforced by the API, our best practice is to create a
+
+#### command that will support two different use-cases with the following 3 integer arguments:
+
+#### 1. page
+
+#### 2. page_size
+
+#### 3. limit
+
+#### The two use cases
+
+#### i. Manual Pagination: - The user wants to control the pagination on its own by using the page
+
+#### and page size arguments, usually as part of a wrapper script for the command. To achieve
+
+#### this, the command will simply pass the page and page size values on to the API request. If
+
+```
+time_epoch = 499137720
+formatted_time = timestamp_to_datestring(time_epoch,"%Y-%m-%dT%H:%M:%S")
+print (formatted_time)
+>>>'1985-10-26T01:22:00'
+```
+
+#### limit argument was also provided, then it will be redundant and should be ignored.
+
+#### ii. Automatic Pagination: - Useful when the user prefers to work with the total number of results
+
+#### returned from the playbook task rather than implementing a wrapper script that works with
+
+#### pages. In this case, the limit argument will be used to aggregate results by iterating over the
+
+#### necessary pages from the first page until collecting all the needed results. This implies a
+
+#### pagination loop mechanism will be implemented behind the scenes. For example, if the limit
+
+#### value received is 250 and the maximal page size enforced by the API is 100, the command will
+
+#### need to perform 3 API calls (pages 1,2, and 3) to collect the 250 requested results. Note that
+
+#### when a potentially large number of results may be returned, and the user wants to perform
+
+#### filters and/or transformers on them, we still recommend creating a wrapper script for the
+
+#### command for better performance.
+
+#### Notes:
+
+#### i. Page Tokens - In case an API supports page tokens, instead of the more common 'limit' and
+
+#### 'offset'/'skip' as query parameters:
+
+#### i. The arguments that will be implemented are: limit, page_size and next_token.
+
+#### ii. The retrieved next_token should be displayed in human readable output and in the
+
+#### context. It will be a single node in the context, and will be overwritten each command run:
+
+#### ii. Standard argument defaults - limit will have a default of '50' in the YAML. page_size
+
+#### should be defaulted in the code to '50', in case only page was provided.
+
+#### iii. There should be no maximum value for the limit argument. This means that users should be
+
+#### able to retrieve as many records as they need in a single command execution.
+
+#### iv. When an integrated API doesn't support pagination parameters at all - then only limit will be
+
+#### applied, and implemented internally in the code. An additional argument will be added to allow
+
+#### the user to retrieve all results by overriding the default limit: all_results=true.
+
+#### v. If API supports only 'limit' and 'offset'/'skip' as query parameters, then all 3 standard XSOAR
+
+#### pagination arguments should be implemented.
+
+##### {
+
+```
+"IntegrationName":
+{
+"Object1NextToken":"TOKEN_VALUE",
+"Object2NextToken":"TOKEN_VALUE",
+"Objects1":[],
+"Objects2":[]
+}
+}
+```
+
+## Credentials
+
+#### When working on integrations that require user credentials (such as username/password, API token/
+
+#### key, etc..) the best practice is to use the credentials parameter type.
+
+#### Using username and password:
+
+#### i. In Demisto UI:
+
+#### ii. In the YML file:
+
+#### i. And in the code:
+
+#### i. In demistomock.py:
+
+#### Using an API Token/Key:
+
+- display: Username
+    name: credentials
+    type: 9
+    required:true
+
+```
+params = demisto.params()
+username = params.get('credentials', {}).get('identifier')
+password = params.get('credentials', {}).get('password')
+```
+```
+return {
+"base_url":"...",
+"credentials": {"identifier": "<username>",
+"password":"<password>"},
+...
+}
+```
+
+#### i. In Demisto UI:
+
+#### ii. In the YML file:
+
+#### Using credentials parameter type is always recommended (even when working with API token\key)
+
+#### as it provides the user the flexibility of using the XSOAR credentials vault feature when configuring
+
+#### the integration for the first time.
+
+#### The hiddenusername configuration key is supported from XSOAR version 6.0.2 and newer. In
+
+#### earlier versions the username field will be visible so we recommend letting the user know this is not
+
+#### mandatory.
+
+## Common Server Functions
+
+#### Before writing a function that seems like a workaround for something that should already exist,
+
+#### check the script helper to see if a function already exists. Examples of Common Server Functions
+
+#### are noted below:
+
+### fileResult
+
+#### This will return a file to the War Room by using the following syntax:
+
+- displaypassword: API Token
+    name: credentials
+    type: 9
+    required:false
+    hiddenusername:true
+
+```
+filename = "foo.txt",
+file_content ="hello foo"
+```
+
+#### You can specify the file type, but it defaults to "None" when not provided.
+
+### create_indicator_result_with_dbotscore_unknown
+
+#### Used for cases where the API response to an indicator is not found and returns a verdict with an
+
+#### unknown score (0). A generic response is returned to the War Room and to the context path, by
+
+#### using the following syntax:
+
+#### The War Room result will show:
+
+#### The Context Path will show:
+
+#### If the integration has a reliability it should be noted, but it defaults to "None" when not provided.
+
+#### Note:
+
+```
+return_results(fileResult(filename, file_content))
+```
+```
+indicator ="www.google.com",
+indicator_type = DBotScoreType.URL
+reliability = DBotScoreReliability.C
+```
+```
+return_results(create_indicator_result_with_dbotscore_unknown(indicator,
+indicator_type, reliability))
+```
+
+#### i. When the indicator is of type CustomIndicator , you need to provide the context_prefix
+
+#### argument.
+
+#### ii. When the indicator is of type Cryptocurrency , you need to provide the address_type
+
+#### argument.
+
+### tableToMarkdown
+
+#### This will transform your JSON, dict, or other table into a Markdown table.
+
+#### The above will create the table seen below: | Input | Output | |--------|--------| | first | foo | | second |
+
+#### bar | | third | baz |
+
+#### In the War Room, this is how a table will appear:
+
+#### # You may also use ```headerTransform``` to convert the existing keys into formatted headers. |This
+
+#### function formats the original data headers (optional).
+
+```
+name ='Sample Table'
+t ={'first':'Foo','second': 'bar','third':'baz','forth':''}
+headers =['Input','Output']
+tableToMarkdown(name, t, headers=headers, removeNull=True)
+```
+```
+t ={'header_1':'a1','header_2':'b1', 'header_3':'c1'}
+```
+
+#### d = { "id": "123", "url1": " https://url1.com", "result": { "files": [ { "filename": "Screen.jpg", "url2":
+
+#### "https://url2.com" } ] }, "links": { "url3": "https://url2.com" } }
+
+#### The resulted table will be:
+
+```
+tableToMarkdown('headerTransform Example', t, headerTransform=underscoreToCamelCase)
+|Header1|Header2|Header3|
+|---|---|---|
+| a1 | b1 | c1 |
+#
+You may also use ```removeNull``` to remove empty columns in the table. Default is
+False.
+```python
+headers =['header_1','header_2']
+data ={
+'header_1': 'foo',
+}
+tableToMarkdown('removeNull Example', data, removeNull=True, headers=headers)
+|header_1|
+|---|
+| foo |
+```
+```
+You may also use ```metadata``` to add text above the table as a secondary title.
+#
+Use the ```url_keys``` argument to specify a list of keys whose value in the MD table
+should be a clickable url. This list may contain keys of inner dicts\list of dicts in
+the data given to the tableToMarkdown function.
+For example, for the following data:
+```
+```
+and using ```url_keys=('url1', 'url2', 'url3')``` (note that some of the keys are
+nested):
+```
+```
+```python
+```
+```
+tableToMarkdown('Data Table', d, headers=('id', 'url1', 'result', 'links'),
+headerTransform=string_to_table_header,
+url_keys=('url1', 'url2', 'url3'))
+```
+
+#### Use the date_fields argument (list) of date fields to format the value to human-readable output.
+
+```
+data =[
+{
+"docker_image":"demisto/python3",
+"create_time":'1631521313466'
+}
+]
+tableToMarkdown('tableToMarkdown date_fields example', data, headers=["docker_image",
+"create_time"],
+date_fields=['create_time'])
+|---|---|
+| demisto/python3 | 2021 - 09 - 13 08: 21 : 53 |
+```
+```
+#
+Use the ```json_transform_mapping``` argument (Dict[str, JsonTransformer]), to map
+between a header key to the corresponding JsonTransformer.
+```python
+data_with_list ={
+"Machine Action Id":"5b38733b-ed80-47be-b892-f2ffb52593fd",
+"MachineId":"f70f9fe6b29cd9511652434919c6530618f06606",
+"Hostname":"desktop-s2455r9",
+"Status":"Succeeded",
+"Creation time": "2022-02-17T08:20:02.6180466Z",
+"Commands": [
+{
+"startTime": null,
+"endTime":"2022-02-17T08:22:33.823Z",
+"commandStatus":"Completed",
+"errors": ["error1", "error2","error3"],
+"command": {
+"type": "GetFile",
+"params": [
+{
+"key": "Path",
+"value":"test.txt"
+}
+```
+
+#### The above will create the table seen below:
+
+##### ]
+
+##### }
+
+##### },
+
+##### {
+
+```
+"startTime": null,
+"endTime":"2022-02-17T08:22:33.823Z",
+"commandStatus":"Completed",
+"errors": [],
+"command": {
+"type": "GetFile",
+"params": [
+{
+"key": "Path",
+"value":"test222.txt"
+} ] } } ] }
+```
+```
+table = tableToMarkdown("tableToMarkdown test", data_with_list,
+json_transform_mapping={'Commands':
+JsonTransformer(keys=('commandStatus','command'))})
+```
+
+#### Use the is_auto_json_transform argument (bool), to try to auto transform a complex JSON.
+
+```
+nested_data_example = {
+"name":"Active Directory Query",
+"changelog": {
+"1.0.4": {
+"path":"",
+"releaseNotes": "\n#### Integrations\n##### Active Directory Query v2\nFixed an
+issue where the ***ad-get-user*** command caused performance issues because the
+*limit* argument was not defined.\n",
+"displayName":"1.0.4 - R124496",
+"released":"2020-09-23T17:43:26Z"
+}
+},
+```
+
+#### The above will create the table seen below:
+
+### demisto.command()
+
+#### demisto.command() is typically used to tie a function to a command in Cortex XSOAR, for example:
+
+### demisto.params()
+
+#### demisto.params() returns a dict of parameters for the given integration. This is used to grab global
+
+#### variables in an integration, for example:
+
+```
+"nested": {
+"item1": {
+"a": 1 ,
+"b": 2 ,
+"c": 3 ,
+"d": 4
+}
+}
+}
+table = tableToMarkdown("tableToMarkdown test", nested_data_example,
+headers=['name','changelog','nested'],
+is_auto_json_transform=True)
+```
+```
+if demisto.command()== 'ip':
+ip_search_command()
+```
+```
+APIKEY = demisto.params().get('apikey')
+```
+
+### demisto.args()
+
+#### demisto.args() returns a dict of arguments for a given command. We use this to get non-global
+
+#### variables, for example:
+
+#### The argument above can be seen in the integration settings as shown below:
+
+#### After the command is executed, the arguments are displayed in the War Room as part of the
+
+#### command, for example:
+
+```
+ACCOUNT_ID = demisto.params().get('account')
+MODE = demisto.params().get('mode')
+INSECURE = demisto.params().get('insecure')
+```
+```
+url = demisto.args().get('url')
+```
+
+### IndicatorsTimeline
+
+#### The IndicatorTimeline is an optional object (available from Server version 5.5.0 and up). It is
+
+#### only applicable for commands that operate on indicators. It is a dictionary (or list of dictionaries) of
+
+#### the following format: When IndicatorTimeline data is returned in an entry, the timeline section of
+
+#### the indicator whose value was noted in the timeline data will be updated (and is viewable in the
+
+#### indicator's view page in Cortex XSOAR as can be seen in the attached image).
+
+
+#### What value should be used for the 'Category' field of a timeline data object?
+
+#### Any Cortex XSOAR integration command or automation that returns timeline data may include
+
+#### the 'Category' value. If not given, When returning timeline data from a Cortex XSOAR
+
+#### integration or automation, the value will be 'Integration Update' or 'Automation Update'
+
+#### accordingly.
+
+#### So when should one include a timeline object in an entry returned to the war room?
+
+#### The answer is any time that a command operates on an indicator. A good indicator (pun intended?)
+
+#### of when timeline data should be included in an entry is to look and see if the command returns a
+
+#### DBotScore or entities as described in our context standards documentation to the entry context. A
+
+#### common case is reputation commands, i.e. !ip, !url, !file, etc. When implementing these
+
+#### commands in integrations, timeline data should be included in the returned entry. To see an
+
+#### example of an integration that returns entries with timeline data, take a look at our AbuseIPDB
+
+#### integration.
+
+#### Arg Type Description
+
+#### indicators list Expects a list of indicators, if a dict is passed it will be put into a list.
+
+#### category str Indicator category.
+
+#### message str Indicator message.
+
+#### Example
+
+
+### CommandResults
+
+#### This class is used to return outputs. This object represents an entry in warroom. A string
+
+#### representation of an object must be parsed into an object before being passed into the field.
+
+#### Arg Type Description
+
+#### outputs_prefix str
+
+#### Should be identical to the prefix in the yml
+
+#### contextPath in yml file. for example:
+
+#### CortexXDR.Incident
+
+#### outputs_key_field str
+
+#### Primary key field in the main object. If the
+
+#### command returns incidents, and one of the
+
+#### properties of the incident is incident_id, then
+
+#### outputs_key_field='incident_id'
+
+#### outputs list / dict
+
+#### (Optional) The data to be returned and will be
+
+#### set to context. If not set, no data will be added
+
+#### to the context
+
+#### readable_output str
+
+#### (Optional) markdown string that will be
+
+#### presented in the War Room, should be human
+
+#### readable - (HumanReadable) - if not set,
+
+#### readable output will be generated via
+
+#### tableToMarkdown function
+
+#### raw_response object
+
+#### (Optional) must be dictionary, if not provided
+
+#### then will be equal to outputs. Usually must be
+
+#### the original raw response from the 3rd party
+
+#### service (originally Contents)
+
+#### indicators list DEPRECATED: use 'indicator' instead.
+
+#### indicator Common.Indicator
+
+#### single indicator like Common.IP,
+
+#### Common.URL, Common.File, etc.
+
+#### indicators_timeline IndicatorsTimeline
+
+#### Must be an IndicatorsTimeline. used by the
+
+#### server to populate an indicator's timeline.
+
+```
+timeline = IndicatorsTimeline(
+indicators=[args.get('ips')],
+message='Important to note'
+)
+```
+```
+timeline = IndicatorsTimeline(
+indicators=[args.get('ips')],
+category='Some category',
+message='IP was blocked in Checkpoint'
+)
+```
+
+#### Arg Type Description
+
+#### ignore_auto_extract bool
+
+#### If set to True prevents the built-in auto-extract
+
+#### from enriching IPs, URLs, files, and other
+
+#### indicators from the result. Default is False.
+
+#### mark_as_note bool
+
+#### If set to True marks the entry as note. Default
+
+#### is False.
+
+#### relationships list
+
+#### A list of EntityRelationship objects
+
+#### representing all the relationships of the
+
+#### indicator.
+
+#### scheduled_command ScheduledCommand
+
+#### Manages the way the command result should
+
+#### be polled.
+
+#### Example
+
+#### Note: More examples on how to return results, here
+
+### return_results
+
+#### return_results() calls demisto.results(). It accept either a list or single item of
+
+#### CommandResults object or any object that demisto.results can accept. Use return_results to
+
+#### return mainly CommandResults object or basic string.
+
+#### Example
+
+```
+results = CommandResults(
+outputs_prefix='VirusTotal.IP',
+outputs_key_field='Address',
+outputs={
+'Address': '8.8.8.8',
+'ASN': 12345
+},
+indicators_timeline = timeline
+)
+return_results(results)
+```
+
+#### Note: More examples on how to return results, here
+
+### return_error
+
+#### Note: Will return error entry to the warroom and will call sys.exit() - meaning the script will stop.
+
+#### Will produce an error in the War Room, for example:
+
+### CommandRunner
+
+#### CommandRunner is a class for executing multiple commands, which returns all valid results together
+
+#### with a human readable summary table of successful commands and commands that return errors.
+
+```
+results = CommandResults(
+outputs_prefix='VirusTotal.IP',
+outputs_key_field='Address',
+outputs={
+'Address': '8.8.8.8',
+'ASN': 12345
+}
+)
+return_results(results)
+```
+```
+return_resultsresults =[ ('Hello World')
+CommandResults(
+outputs_prefix='VirusTotal.IP',
+outputs_key_field='Address',
+outputs={
+'Address':'8.8.8.8',
+'ASN': 12345
+}
+),
+CommandResults(
+outputs_prefix='VirusTotal.IP',
+outputs_key_field='Address',
+outputs={
+'Address':'1.1.1.1',
+'ASN': 67890
+}
+)]
+return_results(results)
+```
+```
+return_error(message="error has occurred: API Key is incorrect", error=ex)
+```
+
+#### To use this functionality, create a list of commands using the CommandRunner.Command, and then call
+
+#### CommandRunner.run_commands_with_summary(commands).
+
+#### CommandRunner.Command: | Arg | Type | Description | | ------ | -----| --------| | commands | str or List[str]
+
+#### | The command to run. Could be a single command or a list of commands. | | args_lst | dict or
+
+#### List[Dict] | The args of the command. If provided in a list and the commands argument is a str, run
+
+#### the command with all the args in the list. If the commands argument is a list, the args_lst should
+
+#### be in the same size, and the args should correspond to the same command index. | | instance | str
+
+#### | (Optional) The instance the command should run | | brand | str | (Optional) The instance the
+
+#### command should run. |
+
+#### Example
+
+#### This returns all the results of all commands, including a human readable summary table.
+
+### DEPRECATED - demisto.results()
+
+#### Note : Use return_results instead
+
+#### demisto.results() returns entries to the War Room from an integration command or an
+
+#### automation. A typical example of returning an entry from an integration command looks as follows:
+
+```
+commands = [CommandRunner.Command('command1', {'arg':'val'},
+CommandRunner.Command('command2', [{'arg1':'val2'}, {'arg2': 'val2'}])),
+CommandRunner.Command(['command3','command4'], [{'arg1':'val2'},
+{'arg2':'val2'}]),
+CommandRunner.Command('command5', {}, instance='some_instance',
+brand='some_brand')]
+```
+```
+return_results(CommandRunner.run_commands_with_summary(commands))
+```
+```
+demisto.results(
+{
+'Type': EntryType.NOTE,
+'ContentsFormat': EntryFormat.TEXT,
+'Contents': res,
+'HumanReadable':'Submitted file is being analyzed.',
+'ReadableContentsFormat': EntryFormat.MARKDOWN,
+'EntryContext': entry_context,
+'IndicatorTimeline': timeline,
+'PollingCommand': polling_command,
+```
+
+#### The entry is composed of multiple components.
+
+#### i. The Type dictates what kind of entry is returned to the warroom. The available options as of
+
+#### today are shown in the dictionary keys of EntryType below.
+
+#### ii. The ContentsFormat dictates how to format the value passed to the Content field, the
+
+#### available options can be seen below.
+
+#### iii. The Content usually takes the raw unformatted data - if an API call was made in a command,
+
+#### then typically the response from the request is passed here.
+
+#### iv. The HumanReadable is the textual information displayed in the warroom entry.
+
+#### v. The ReadableContentsFormat dictates how to format the value passed to the HumanReadable
+
+#### field.
+
+#### vi. The EntryContext is the dictionary of context outputs for a given command. For more
+
+#### information see Outputs.
+
+#### vii. The IndicatorTimeline is an optional field (available from Server version 5.5.0 and up). It is
+
+#### only applicable for commands that operate on indicators. It is a dictionary (or list of dictionaries)
+
+#### of the following format:
+
+#### viii. The PollingCommand runs after the time period (in seconds) designated in the NextRun
+
+#### argument.
+
+#### ix. The NextRun argument is the next run time in seconds for the PollingCommand. The
+
+#### PollingCommand executes after this time period.
+
+#### x. The Timeout argument is the timeout in seconds for polling sequence command execution.
+
+#### However, if a user has provided an execution-timeout, it overrides the timeout specified by
+
+#### this field.
+
+#### xi. PollingArgs are the arguments that will be used while running the PollingCommand.
+
+```
+'NextRun': next_run,
+'Timeout': timeout,
+'PollingArgs': polling_args
+}
+)
+```
+
+#### When IndicatorTimeline data is returned in an entry, the timeline section of the indicator
+
+#### whose value was noted in the timeline data will be updated (and is viewable in the indicator's
+
+#### view page in Cortex XSOAR as can be seen in the attached image).
+
+#### What value should be used for the 'Category' field of a timeline data object?
+
+#### Any Cortex XSOAR integration command that returns timeline data should include the
+
+#### 'Category' value of 'Integration Update'. When returning timeline data from a Cortex
+
+#### XSOAR automation, the value passed to the 'Category' field should be 'Automation
+
+#### Update'.
+
+#### So when should one include a timeline object in an entry returned to the war room?
+
+#### The answer is any time that a command operates on an indicator. A good indicator (pun
+
+#### intended?) of when timeline data should be included in an entry is to look and see if the
+
+#### command returns a DBotScore or entities as described in our context standards
+
+#### documentation to the entry context. A common case is reputation commands, i.e. !ip, !url,
+
+#### !file, etc. When implementing these commands in integrations, timeline data should be
+
+#### included in the returned entry. To see an example of an integration that returns entries with
+
+#### timeline data, take a look at our AbuseIPDB integration.
+
+#### The EntryType and EntryFormat enum classes are imported from CommonServerPython and
+
+#### respectively appear as follows:
+
+##### {
+
+```
+'Value': indicator_value, # for example, an IP address like '8.8.8.8'
+'Message':'ExampleVendor marked the IP address 8.8.8.8 as "Good"',
+'Category': 'Integration Update'
+}
+```
+```
+class EntryType(object):
+NOTE = 1
+DOWNLOAD_AGENT = 2
+FILE = 3
+ERROR = 4
+```
+
+### DEPRECATED - return_outputs
+
+#### Note: Use return_results instead
+
+#### return_outputs() is a convenience function - it is simply a wrapper of demisto.results() used
+
+#### to return results to the War Room and which defaults to the most commonly used configuration for
+
+#### entries, only exposing the most functional parameters for the sake of simplicity. For example:
+
+##### PINNED = 5
+
+##### USER_MANAGEMENT = 6
+
+##### IMAGE = 7
+
+##### PLAYGROUND_ERROR = 8
+
+##### ENTRY_INFO_FILE = 9
+
+##### WARNING = 11
+
+##### MAP_ENTRY_TYPE = 15
+
+##### WIDGET = 17
+
+```
+class EntryFormat(object):
+HTML = 'html'
+TABLE ='table'
+JSON = 'json'
+TEXT = 'text'
+DBOT_RESPONSE ='dbotCommandResponse'
+MARKDOWN ='markdown'
+```
+```
+def return_outputs(readable_output, outputs=None, raw_response=None, timeline=None):
+"""
+This function wraps the demisto.results(), makes the usage of returning results
+to the user more intuitively.
+```
+```
+:type readable_output: ``str``
+:param readable_output: markdown string that will be presented in the War Room,
+should be human readable -
+(HumanReadable)
+```
+```
+:type outputs: ``dict``
+:param outputs: the outputs that will be returned to playbook/investigation
+context (originally EntryContext)
+```
+```
+:type raw_response: ``dict`` | ``list``
+:param raw_response: must be dictionary, if not provided then will be equal to
+outputs. usually must be the original
+```
+
+### AutoExtract
+
+#### As part of CommandResults() there is an argument called ignore_auto_extract, which prevents
+
+#### the built-in indicator extraction feature from enriching IPs, URLs, files, and other indicators from the
+
+#### result. For example:
+
+#### Note: By default, ignore_auto_extract is set to False.
+
+```
+raw response from the 3rd party service (originally Contents)
+```
+```
+:type timeline: ``dict`` | ``list``
+:param timeline: expects a list, if a dict is passed it will be put into a list.
+used by server to populate an
+indicator's timeline
+```
+```
+:return: None
+:rtype: ``None``
+"""
+```
+```
+return_outputs(
+"## Some h2 header",
+{"some":"json into context"},
+{"some":"raw JSON/dict"},
+{'Value':'some indicator','Message':'Some message','Category': 'Integration
+Update'}
+)
+```
+```
+results = CommandResults(
+outputs_prefix='VirusTotal.IP',
+outputs_key_field='Address',
+outputs={
+'Address': '8.8.8.8',
+'ASN': 12345
+},
+indicators_timeline = timeline,
+ignore_auto_extract =True
+)
+return_results(results)
+```
+

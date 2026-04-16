@@ -1,0 +1,3717 @@
+# Common Server Python
+
+Common functions that will be appended to the code of each integration/script before being
+executed.
+
+## AutoFocusKeyRetriever
+
+AutoFocus API Key management class
+**Arguments** :
+i. api_key _str_ : Auto Focus API key coming from the integration parameters
+ii. override_default_credentials _bool_ : Whether to override the default credentials and use the
+Cortex XSOAR given AutoFocus API Key
+
+## BarColumnPieWidget
+
+Bar/Column/Pie Widget representation
+**Arguments** :
+i. categories _list_ : a list of categories to display(Better use the add_category function to populate
+the data.
+
+**add_category**
+
+Add a category to widget.
+**Arguments** :
+i. name _str_ : the name of the category to add.
+
+```
+| BarColumnPieWidget.add_category(name, number)
+```
+
+```
+ii. number int : the number value of the category.
+```
+**to_display**
+
+## CommandResults
+
+CommandResults class - use to return results to warroom
+**Arguments** :
+i. outputs_prefix _str_ : should be identical to the prefix in the yml contextPath in yml file. for
+example: CortexXDR.Incident
+ii. outputs_key_field _str or list[str]_ : primary key field in the main object. If the command returns
+Incidents, and of the properties of Incident is incident_id, then outputs_key_field='incident_id'. If
+object has multiple unique keys, then list of strings is supported outputs_key_field=['id1', 'id2']
+iii. outputs _list or dict_ : the data to be returned and will be set to context
+iv. indicators _list_ : DEPRECATED: use 'indicator' instead.
+v. indicator _Common.Indicator_ : single indicator like Common.IP, Common.URL, Common.File,
+etc.
+vi. readable_output _str_ : (Optional) markdown string that will be presented in the warroom, should
+be human readable - (HumanReadable) - if not set, readable output will be generated
+vii. raw_response _dict | list_ : must be dictionary, if not provided then will be equal to outputs. usually
+must be the original raw response from the 3rd party service (originally Contents)
+viii. indicators_timeline _IndicatorsTimeline_ : must be an IndicatorsTimeline. used by the server to
+populate an indicator's timeline.
+ix. ignore_auto_extract _bool_ : must be a boolean, default value is False. Used to prevent
+AutoExtract on output.
+x. relationships _list of EntityRelationship_ : List of relationships of the indicator.
+
+```
+| BarColumnPieWidget.to_display()
+```
+
+xi. mark_as_note _bool_ : must be a boolean, default value is False. Used to mark entry as note.
+xii. tags _list_ : must be a list, default value is None. Used to tag war room entries.
+xiii. entry_type _int code of EntryType_ : type of return value, see EntryType
+xiv. scheduled_command _ScheduledCommand_ : manages the way the command should be polled.
+xv. execution_metrics _ExecutionMetrics_ : contains metric data about a command's execution
+xvi. replace_existing _bool_ : Replace the context value at outputs_prefix if it exists. Works only if
+outputs_prefix is a path to a nested value i.e., contains a period. For example, the "next token"
+result should always be overwritten. This response can be returned as follows:
+**Examples** :
+
+**to_context**
+
+## CommandRunner
+
+Class for executing multiple commands and save the results of each command.
+
+## Command
+
+Data class with the data required to execute a command.
+
+```
+>>>>>> CommandResults readable_output( =f'Next Token: {next_token}',
+>>>>>> outputs outputs_prefix=next_token='Path.To.NextToken', ,
+>>>>>> replace_existing) =True,
+```
+```
+| CommandResults.to_context()
+```
+
+**Arguments** :
+i. commands __: The commands list or a single command
+ii. args_lst _str + List[str]_ : The args list or a single args
+iii. brand _List[Dict] + Dict_ : The brand to use
+iv. instance _str_ : The instance to use
+
+**_is_valid**
+
+Error handling of the given arguments
+**Arguments** :
+i. commands __: list of commands
+ii. args_lst __: list of args
+
+## Result
+
+Class for the result of the command.
+**Arguments** :
+i. command __: command that was run. :type command str
+ii. args __: args that was run.
+iii. brand _dict_ : The brand that was used.
+iv. instance _str_ : The instance that was used.
+v. result _str_ : The result of the command.
+
+**execute_commands**
+
+Runs the demisto.executeCommand() and gets all the results, including the errors, returned from
+the command.
+
+```
+| Command._is_valid(commands, args_lst)
+```
+```
+| CommandRunner.execute_commands(command, extract_contents=True)
+```
+
+**Arguments** :
+i. command _Command_ : The commands to run. (required)
+ii. extract_contents _bool_ : Whether to extract Contents part of the results. Default is True.
+**Returns** :
+i. Tuple[List[ResultWrapper], List[ResultWrapper]] - A tuple of two lists: the command
+results list and command errors list.
+
+**run_commands_with_summary**
+
+Given a list of commands, return a list of results (to pass to return_results). In addition, it will create
+a CommandResult of the summary of the commands, which is a readable_output.
+**Arguments** :
+i. commands __: A list of commands.
+
+**get_results_summary**
+
+Get a Human Readable result for all the results of the commands.
+**Arguments** :
+i. results __: list of returned results
+ii. errors __: list of returned errors
+
+## ConfKey
+
+YML configuration key fields.
+
+```
+| CommandRunner.run_commands_with_summary(commands)
+```
+```
+| CommandRunner.get_results_summary(results, errors)
+```
+
+This is an empty class, used for code autocompletion when using demisto-sdk
+generate_yml_from_python command syntax. For more information, visit the command's
+README.md.
+**Returns** :
+i. ConfKey - The ConfKey object
+
+## DBotScoreReliability
+
+Enum: Source reliability levels Values are case sensitive
+i. A_PLUS
+ii. A
+iii. B
+iv. C
+v. D
+vi. E
+vii. F
+
+**is_valid_type**
+
+**get_dbot_score_reliability_from_str**
+
+## DBotScoreType
+
+```
+| DBotScoreReliability.is_valid_type(_type)
+```
+```
+| DBotScoreReliability.get_dbot_score_reliability_from_str(reliability_str)
+```
+
+Enum: contains all the indicator types DBotScoreType.IP DBotScoreType.FILE
+DBotScoreType.DOMAIN DBotScoreType.URL DBotScoreType.CVE DBotScoreType.ACCOUNT
+DBotScoreType.CRYPTOCURRENCY DBotScoreType.EMAIL DBotScoreType.ATTACKPATTERN
+DBotScoreType.CUSTOM
+i. IP
+ii. FILE
+iii. DOMAIN
+iv. URL
+v. CVE
+vi. ACCOUNT
+vii. CIDR
+viii. DOMAINGLOB
+ix. CERTIFICATE
+x. CRYPTOCURRENCY
+xi. EMAIL
+xii. ATTACKPATTERN
+xiii. CUSTOM
+
+**is_valid_type**
+
+## DebugLogger
+
+Wrapper to initiate logging at logging.DEBUG level. Is used when debug-mode=True.
+
+```
+| DBotScoreType.is_valid_type(cls, _type)
+```
+
+**__del__**
+
+**log_start_debug**
+
+Utility function to log start of debug mode logging
+
+## DemistoHandler
+
+Handler to route logging messages to an IntegrationLogger or demisto.debug if not supplied
+
+**emit**
+
+## EntityRelationship
+
+XSOAR entity relationship.
+**Arguments** :
+i. name _str_ : Relationship name.
+ii. relationship_type _str_ : Relationship type. (e.g. IndicatorToIndicator...).
+iii. entity_a _str_ : A value, A aka source of the relationship.
+iv. entity_a_family _str_ : Entity family of A, A aka source of the relationship. (e.g. Indicator...)
+v. entity_a_type _str_ : Entity A type, A aka source of the relationship. (e.g. IP/URL/...).
+
+```
+| DebugLogger.__del__()
+```
+```
+| DebugLogger.log_start_debug()
+```
+```
+| DemistoHandler.emit(record)
+```
+
+```
+vi. entity_b str : B value, B aka destination of the relationship.
+vii. entity_b_family str : Entity family of B, B aka destination of the relationship. (e.g. Indicator...)
+viii. entity_b_type str : Entity B type, B aka destination of the relationship. (e.g. IP/URL/...).
+ix. source_reliability str : Source reliability.
+x. fields dict : Custom fields. (Optional)
+xi. brand str : Source brand name. (Optional)
+```
+## RelationshipsTypes
+
+Relationships Types objects.
+
+**RELATIONSHIP_TYPES
+is_valid_type**
+
+## RelationshipsFamily
+
+Relationships Family object list.
+
+**INDICATOR
+is_valid_type**
+
+## Relationships
+
+```
+| RelationshipsTypes.is_valid_type(_type)
+```
+```
+| RelationshipsFamily.is_valid_type(_type)
+```
+
+Enum: Relations names and their reverse
+i. APPLIED
+ii. ATTACHMENT_OF
+iii. ATTACHES
+iv. ATTRIBUTE_OF
+v. ATTRIBUTED_BY
+vi. ATTRIBUTED_TO
+vii. AUTHORED_BY
+viii. BEACONS_TO
+ix. BUNDLED_IN
+x. BUNDLES
+xi. COMMUNICATED_WITH
+xii. COMMUNICATED_BY
+xiii. COMMUNICATES_WITH
+xiv. COMPROMISES
+xv. CONTAINS
+xvi. CONTROLS
+xvii. CREATED_BY
+xviii. CREATES
+xix. DELIVERED_BY
+xx. DELIVERS
+
+
+xxi. DETECTS
+xxii. DETECTED_BY
+xxiii. DOWNLOADS
+xxiv. DOWNLOADS_FROM
+xxv. DROPPED_BY
+xxvi. DROPS
+xxvii. DUPLICATE_OF
+xxviii. EMBEDDED_IN
+xxix. EMBEDS
+xxx. EXECUTED
+xxxi. EXECUTED_BY
+xxxii. EXFILTRATES_TO
+xxxiii. EXPLOITS
+xxxiv. HAS
+xxxv. HOSTED_ON
+xxxvi. HOSTS
+xxxvii. IMPERSONATES
+xxxviii. INDICATED_BY
+xxxix. INDICATOR_OF
+xl. INJECTED_FROM
+xli. INJECTS_INTO
+
+
+xlii. INVESTIGATES
+xliii. IS_ALSO
+xliv. LOCATED_AT
+xlv. MITIGATED_BY
+xlvi. MITIGATES
+xlvii. ORIGINATED_FROM
+xlviii. OWNED_BY
+xlix. OWNS
+l. PART_OF
+li. RELATED_TO
+lii. REMEDIATES
+liii. RESOLVED_BY
+liv. RESOLVED_FROM
+lv. RESOLVES_TO
+lvi. SEEN_ON
+lvii. SENT
+lviii. SENT_BY
+lix. SENT_FROM
+lx. SENT_TO
+lxi. SIMILAR_TO
+lxii. SUB_DOMAIN_OF
+
+
+lxiii. SUB_TECHNIQUE_OF
+lxiv. PARENT_TECHNIQUE_OF
+lxv. SUPRA_DOMAIN_OF
+lxvi. TARGETED_BY
+lxvii. TARGETS
+lxviii. TYPES
+lxix. UPLOADED_TO
+lxx. USED_BY
+lxxi. USED_ON
+lxxii. USES
+lxxiii. VARIANT_OF
+lxxiv. RELATIONSHIPS_NAMES
+
+```
+is_valid
+```
+```
+Arguments :
+i. _type str : the data to be returned and will be set to context
+Returns :
+i. bool - Is the given type supported
+get_reverse
+```
+```
+| Relationships.is_valid(_type)
+```
+```
+| Relationships.get_reverse(name)
+```
+
+**Arguments** :
+i. name _str_ : Relationship name
+**Returns** :
+i. str - Returns the reversed relationship name
+
+**to_entry**
+
+Convert object to XSOAR entry
+**Returns** :
+i. dict - XSOAR entry representation.
+
+**to_indicator**
+
+Convert object to XSOAR entry
+**Returns** :
+i. dict - XSOAR entry representation.
+
+**to_context**
+
+Convert object to XSOAR context
+**Returns** :
+i. dict - XSOAR context representation.
+
+```
+| EntityRelationship.to_entry()
+```
+```
+| EntityRelationship.to_indicator()
+```
+```
+| EntityRelationship.to_context()
+```
+
+## EntryFormat
+
+Enum: contains all the entry formats (e.g. HTML, TABLE, JSON, etc.)
+i. HTML
+ii. TABLE
+iii. JSON
+iv. TEXT
+v. DBOT_RESPONSE
+vi. MARKDOWN
+
+**is_valid_type**
+
+## EntryType
+
+Enum: contains all the entry types (e.g. NOTE, ERROR, WARNING, FILE, etc.)
+i. NOTE
+ii. DOWNLOAD_AGENT
+iii. FILE
+iv. ERROR
+v. PINNED
+vi. USER_MANAGEMENT
+vii. IMAGE
+
+```
+| EntryFormat.is_valid_type(cls, _type)
+```
+
+```
+viii. PLAYGROUND_ERROR
+ix. ENTRY_INFO_FILE
+x. VIDEO_FILE
+xi. WARNING
+xii. STATIC_VIDEO_FILE
+xiii. MAP_ENTRY_TYPE
+xiv. WIDGET
+xv. EXECUTION_METRICS
+```
+## ErrorTypes
+
+Enum: contains all the available error types
+i. SUCCESS
+ii. QUOTA_ERROR
+iii. GENERAL_ERROR
+iv. AUTH_ERROR
+v. SERVICE_ERROR
+vi. CONNECTION_ERROR
+vii. PROXY_ERROR
+viii. SSL_ERROR
+ix. TIMEOUT_ERROR
+x. RETRY_ERROR
+
+
+## ExecutionMetrics
+
+ExecutionMetrics is used to collect and format metric data to be reported to the XSOAR server.
+
+**is_supported**
+
+**success**
+
+**success**
+
+**quota_error**
+
+**quota_error**
+
+**general_error**
+
+**general_error**
+
+```
+| ExecutionMetrics.is_supported()
+```
+```
+| ExecutionMetrics.success()
+```
+```
+| ExecutionMetrics.success(value)
+```
+```
+| ExecutionMetrics.quota_error()
+```
+```
+| ExecutionMetrics.quota_error(value)
+```
+```
+| ExecutionMetrics.general_error()
+```
+```
+| ExecutionMetrics.general_error(value)
+```
+
+**auth_error**
+
+**auth_error**
+
+**service_error**
+
+**service_error**
+
+**connection_error**
+
+**connection_error**
+
+**proxy_error**
+
+**proxy_error**
+
+```
+| ExecutionMetrics.auth_error()
+```
+```
+| ExecutionMetrics.auth_error(value)
+```
+```
+| ExecutionMetrics.service_error()
+```
+```
+| ExecutionMetrics.service_error(value)
+```
+```
+| ExecutionMetrics.connection_error()
+```
+```
+| ExecutionMetrics.connection_error(value)
+```
+```
+| ExecutionMetrics.proxy_error()
+```
+```
+| ExecutionMetrics.proxy_error(value)
+```
+
+**ssl_error**
+
+**ssl_error**
+
+**timeout_error**
+
+**timeout_error**
+
+**retry_error**
+
+**retry_error**
+
+**get_metric_list**
+
+**update_metrics**
+
+```
+| ExecutionMetrics.ssl_error()
+```
+```
+| ExecutionMetrics.ssl_error(value)
+```
+```
+| ExecutionMetrics.timeout_error()
+```
+```
+| ExecutionMetrics.timeout_error(value)
+```
+```
+| ExecutionMetrics.retry_error()
+```
+```
+| ExecutionMetrics.retry_error(value)
+```
+```
+| ExecutionMetrics.get_metric_list()
+```
+```
+| ExecutionMetrics.update_metrics(metric_type, metric_value)
+```
+
+## FeedIndicatorType
+
+Type of Indicator (Reputations), used in TIP integrations
+
+**Account**
+
+**CVE
+Domain**
+
+**DomainGlob**
+
+**Email
+File**
+
+**FQDN**
+
+**Host
+IP**
+
+**CIDR
+IPv**
+
+**IPv6CIDR**
+
+**Registry
+SSDeep**
+
+**URL**
+
+**AS
+MUTEX**
+
+**Malware**
+
+
+**Identity**
+
+**Location**
+
+**Software
+X509**
+
+**is_valid_type**
+
+**list_all_supported_indicators**
+
+**ip_to_indicator_type**
+
+Returns the indicator type of the input IP.
+**Arguments** :
+i. ip _str_ : IP address to get it's indicator type.
+**Returns** :
+i. str - : Indicator type from FeedIndicatorType, or None if invalid IP address.
+
+**indicator_type_by_server_version**
+
+Returns the indicator type of the input by the server version. If the server version is 6.2 and greater,
+remove the STIX prefix of the type
+
+```
+| FeedIndicatorType.is_valid_type(_type)
+```
+```
+| FeedIndicatorType.list_all_supported_indicators()
+```
+```
+| FeedIndicatorType.ip_to_indicator_type(ip)
+```
+```
+| FeedIndicatorType.indicator_type_by_server_version(indicator_type)
+```
+
+**Arguments** :
+i. indicator_type _str_ : Type of an indicator.
+**Returns** :
+i. str - : Indicator type.
+
+## FileAttachmentType
+
+Enum: contains the file attachment types, Used to add metadata to the description of the attachment
+whether the file content is expected to be inline or attached as a file
+**Returns** :
+i. str - : The file attachment type
+ii. ATTACHED
+
+## FormatADTimestamp
+
+Formats an Active Directory timestamp into human readable time representation
+**Arguments** :
+i. ts _int_ : The timestamp to be formatted (required)
+**Returns** :
+i. str - A string represeting the time
+
+## FormatIso8601
+
+```
+FormatADTimestamp(ts)
+```
+
+Convert a time expressed in seconds to ISO 8601 time format string
+**Arguments** :
+i. t _int_ : Time expressed in seconds (required)
+**Returns** :
+i. str - An ISO 8601 time format string
+
+## GetDemistoVersion
+
+Callable class to replace get_demisto_version function
+
+**__call__**
+
+Returns the Demisto version and build number.
+**Returns** :
+i. dict - Demisto version object if Demisto class has attribute demistoVersion, else raises
+AttributeError
+
+## GetMappingFieldsResponse
+
+Handler for the mapping fields object.
+**Arguments** :
+i. scheme_types_mapping _list_ : List of all the mappings in the remote system.
+
+**add_scheme_type**
+
+```
+FormatIso8601(t)
+```
+```
+| GetDemistoVersion.__call__()
+```
+
+Add another incident type mapping.
+**Arguments** :
+i. scheme_type_mapping _dict_ : mapping of a singular field.
+
+**extract_mapping**
+
+Extracts the mapping into XSOAR mapping screen.
+**Returns** :
+i. dict - the mapping object for the current field.
+
+## GetModifiedRemoteDataArgs
+
+get-modified-remote-data args parser
+**Arguments** :
+i. args _dict_ : arguments for the command.
+
+## GetModifiedRemoteDataResponse
+
+get-modified-remote-data response parser
+**Arguments** :
+i. modified_incident_ids _list_ : The incidents that were modified since the last check.
+
+**to_entry**
+
+```
+| GetMappingFieldsResponse.add_scheme_type(scheme_type_mapping)
+```
+```
+| GetMappingFieldsResponse.extract_mapping()
+```
+```
+| GetModifiedRemoteDataResponse.to_entry()
+```
+
+Extracts the response
+**Returns** :
+i. list - List of incidents to run the get-remote-data command on.
+
+## GetRemoteDataArgs
+
+get-remote-data args parser
+**Arguments** :
+i. args _dict_ : arguments for the command.
+
+## GetRemoteDataResponse
+
+get-remote-data response parser
+**Arguments** :
+i. mirrored_object _dict_ : The object you are mirroring, in most cases the incident.
+ii. entries _list_ : The entries you want to add to the war room.
+
+**extract_for_local**
+
+Extracts the response into the mirrored incident.
+**Returns** :
+i. list - List of details regarding the mirrored incident.
+
+## IncidentSeverity
+
+```
+| GetRemoteDataResponse.extract_for_local()
+```
+
+Enum: contains all the incident severity types
+i. UNKNOWN
+ii. INFO
+iii. LOW
+iv. MEDIUM
+v. HIGH
+vi. CRITICAL
+
+## IncidentStatus
+
+Enum: contains all the incidents status types (e.g. pending, active, done, archive)
+i. PENDING
+ii. ACTIVE
+iii. DONE
+iv. ARCHIVE
+
+## IndicatorsSearcher
+
+Used in order to search indicators by the paging or serachAfter param
+**Arguments** :
+i. page _int_ : the number of page from which we start search indicators from.
+ii. filter_fields _Optional[str]_ : comma separated fields to filter (e.g. "value,type")
+iii. from_date _Optional[str]_ : the start date to search from.
+
+
+```
+iv. query Optional[str] : indicator search query
+v. to_date Optional[str] : the end date to search until to.
+vi. value str : the indicator value to search.
+vii. limit Optional[int] : the current upper limit of the search (can be updated after init)
+viii. sort List[Dict] : An array of sort params ordered by importance. Item structure: {"field": string,
+"asc": boolean}
+```
+**SEARCH_AFTER_TITLE**
+
+**__iter__**
+
+**next**
+
+**__next__**
+
+**page**
+
+**total**
+
+**limit**
+
+```
+| IndicatorsSearcher.__iter__()
+```
+```
+| IndicatorsSearcher.next()
+```
+```
+| IndicatorsSearcher.__next__()
+```
+```
+| IndicatorsSearcher.page()
+```
+```
+| IndicatorsSearcher.total()
+```
+
+**limit**
+
+**is_search_done**
+
+Return True if one of these conditions is met (else False):
+
+1. self.limit is set, and it's updated to be less or equal to zero - return True
+2. for search_after if self.total was populated by a previous search, but no
+    self._search_after_param
+3. for page if self.total was populated by a previous search, but page is too large
+
+**search_indicators_by_version**
+
+There are 2 cases depends on the sever version:
+
+1. Search indicators using paging, raise the page number in each call.
+2. Search indicators using searchAfter param, update the _search_after_param in each call.
+**Arguments** :
+i. from_date _Optional[str]_ : the start date to search from.
+ii. query _Optional[str]_ : indicator search query
+iii. size _int_ : limit the number of returned results.
+iv. to_date _Optional[str]_ : the end date to search until to.
+v. value _str_ : the indicator value to search.
+
+```
+| IndicatorsSearcher.limit()
+| IndicatorsSearcher.limit(value)
+```
+```
+| IndicatorsSearcher.is_search_done()
+```
+```
+size| IndicatorsSearcher= 100 , to_date=None.search_indicators_by_version, value='') (from_date=None, query='',
+```
+
+**Returns** :
+i. dict - object contains the search results
+
+## IndicatorsTimeline
+
+IndicatorsTimeline class - use to return Indicator Timeline object to be used in CommandResults
+**Arguments** :
+i. indicators _list_ : expects a list of indicators.
+ii. category _str_ : indicator category.
+iii. message _str_ : indicator message.
+
+## InputArgument
+
+YML input argument for a command.
+This is an empty class, used for code autocompletion when using demisto-sdk
+generate_yml_from_python command syntax. For more information, visit the command's
+README.md.
+**Returns** :
+i. InputArgument - The InputArgument object
+
+## IntegrationLogger
+
+a logger for python integrations: use LOG(<message>) to add a record to the logger (message can
+be any object with **str** ) use LOG.print_log(verbose=True/False) to display all records in War-
+Room (if verbose) and server log. use add_replace_strs to add sensitive strings that should be
+replaced before going to the log.
+**Arguments** :
+
+
+```
+i. message str : The message to be logged
+```
+**_iter_sensistive_dict_obj**
+
+**encode**
+
+**__call__**
+
+**add_replace_strs**
+
+Add strings which will be replaced when logging. Meant for avoiding passwords and so forth in the
+log.
+
+**set_buffering**
+
+set whether the logger buffers messages or writes staight to the demisto log
+**Arguments** :
+i. state __: True/False
+
+**print_log**
+
+```
+| IntegrationLogger._iter_sensistive_dict_obj(dict_obj, sensitive_params)
+```
+```
+| IntegrationLogger.encode(message)
+```
+```
+| IntegrationLogger.__call__(message)
+```
+```
+| IntegrationLogger.add_replace_strs(*args)
+```
+```
+| IntegrationLogger.set_buffering(state)
+```
+```
+| IntegrationLogger.print_log(verbose=False)
+```
+
+**build_curl**
+
+Parses the HTTP client "send" log messages and generates cURL queries out of them.
+**Arguments** :
+i. text _str_ : The HTTP client log message.
+
+**write**
+
+**print_override**
+
+## JsonTransformer
+
+A class to transform a json to
+**Arguments** :
+i. flatten _bool_ : Should we flatten the json using flattenCell (for BC)
+ii. keys _Set[str]_ : Set of keys to keep
+iii. is_nested _bool_ : If look for nested
+iv. func _Callable_ : A function to parse the json
+Constructor for JsonTransformer
+**Arguments** :
+
+```
+| IntegrationLogger.build_curl(text)
+```
+```
+| IntegrationLogger.write(msg)
+```
+```
+| IntegrationLogger.print_override(*args,**kwargs)
+```
+
+```
+i. flatten bool : Should we flatten the json using flattenCell (for BC)
+ii. keys Iterable[str] : an iterable of relevant keys list from the json. Notice we save it as a set in
+the class
+iii. is_nested bool : Whether to search in nested keys or not
+iv. func Callable : A function to parse the json
+```
+**json_to_str**
+
+**json_to_path_generator**
+
+**Arguments** :
+i. json_input _list or dict_ : The json input to transform
+ii. path _List[str + int]_ : The path of the key, value pair inside the json
+:rtype Tuple[List[str + int], str, str]
+
+## LineWidget
+
+Line Widget representation
+**Arguments** :
+i. categories _Any_ : a list of categories to display(Better use the add_category function to
+populate the data.
+
+**add_category**
+
+```
+| JsonTransformer.json_to_str(json_input, is_pretty=True)
+```
+```
+| JsonTransformer.json_to_path_generator(json_input, path=None)
+```
+```
+| LineWidget.add_category(name, number, group)
+```
+
+Add a category to widget.
+**Arguments** :
+i. name _str_ : the name of the category to add.
+ii. number _int_ : the number value of the category.
+iii. group _str_ : the name of the relevant group.
+
+**to_display**
+
+## NormalizeRegistryPath
+
+Normalizes a registry path string
+**Arguments** :
+i. strRegistryPath _str_ : The registry path (required)
+**Returns** :
+i. str - The normalized string
+
+## NumberWidget
+
+Number Widget representation
+**Arguments** :
+i. number _int_ : The number for the widget to display.
+
+```
+| LineWidget.to_display()
+```
+```
+NormalizeRegistryPath(strRegistryPath)
+```
+
+**to_display**
+
+## OutputArgument
+
+YML output argument.
+This is an empty class, used for code autocompletion when using demisto-sdk
+generate_yml_from_python command syntax. For more information, visit the command's
+README.md.
+**Returns** :
+i. OutputArgument - The OutputArgument object
+
+## ParameterTypes
+
+YML ConfKey key_type type.
+This is an empty class, used for code autocompletion when using demisto-sdk
+generate_yml_from_python command syntax. For more information, visit the command's
+README.md.
+**Returns** :
+i. ParameterTypes - The ParameterTypes enum
+
+**STRING**
+
+**NUMBER
+ENCRYPTED**
+
+**BOOLEAN
+AUTH**
+
+```
+| NumberWidget.to_display()
+```
+
+### DOWNLOAD_LINK
+
+### TEXT_AREA
+
+### INCIDENT_TYPE
+
+### TEXT_AREA_ENCRYPTED
+
+### SINGLE_SELECT
+
+### MULTI_SELECT
+
+## PollResult
+
+The response object for polling functions. This object contains information about whether to run
+again, and what the CommandResults are in case of success, or failure.
+**Returns** :
+i. PollResult - PollResult
+Constructor for PollResult
+**Arguments** :
+i. response _Any_ : The response of the command in the event of success, or in case of failure but
+Polling is false
+ii. continue_to_poll _Union[bool, Callable]_ : An iterable of relevant keys list from the json. Notice
+we save it as a set in the class
+iii. args_for_next_run _Dict_ : The arguments to use in the next iteration. Will use the input args in
+case of None
+iv. partial_result _CommandResults_ : CommandResults to return, even though we will poll again
+
+## PrettifyCompactedTimestamp
+
+
+Formats a compacted timestamp string into human readable time representation
+**Arguments** :
+i. x _str_ : The timestamp to be formatted (required)
+**Returns** :
+i. str - A string represeting the time
+
+## ScheduledCommand
+
+ScheduledCommand configuration class Holds the scheduled command configuration for the
+command result - managing the way the command should be polled.
+**Arguments** :
+i. command _str_ : The command that'll run after next_run_in_seconds has passed.
+ii. next_run_in_seconds _int_ : How long to wait before executing the command.
+iii. args _Optional[Dict[str, Any]]_ : Arguments to use when executing the command.
+iv. timeout_in_seconds _Optional[int]_ : Number of seconds until the polling sequence will timeout.
+v. items_remaining _Optional[int]_ : Number of items that are remaining to be polled.
+
+**VERSION_MISMATCH_ERROR
+raise_error_if_not_supported**
+
+**supports_polling**
+
+```
+PrettifyCompactedTimestamp(x)
+```
+```
+| ScheduledCommand.raise_error_if_not_supported()
+```
+
+Check if the integration supports polling (if server version is greater than 6.2.0). Returns: Boolean
+
+**to_results**
+
+Returns the result dictionary of the polling command
+
+## SchemeTypeMapping
+
+Scheme type mappings builder.
+**Arguments** :
+i. type_name _str_ : The name of the remote incident type.
+ii. fields _dict_ : The dict of fields to their description.
+
+**add_field**
+
+Adds a field to the incident type mapping.
+**Arguments** :
+i. name _str_ : The name of the field.
+ii. description _str_ : The description for that field.a
+
+**extract_mapping**
+
+Extracts the mapping into XSOAR mapping screen.
+
+```
+| ScheduledCommand.supports_polling()
+```
+```
+| ScheduledCommand.to_results()
+```
+```
+| SchemeTypeMapping.add_field(name, description='')
+```
+```
+| SchemeTypeMapping.extract_mapping()
+```
+
+**Returns** :
+i. dict - the mapping object for the current field.
+
+## SmartGetDict
+
+A dict that when called with get(key, default) will return the default passed value, even if there is a
+value of "None" in the place of the key. Example with built-in dict:
+
+Example with SmartGetDict:
+
+```
+**Examples**:
+```python>>> d = {}
+>>> d['test'] = None>>> d.get('test', 1)
+>>> print(d.get('test', 1))None
+```
+```
+>>> d = SmartGetDict()>>> d['test'] = None
+>>> d.get('test', 1)>>> print(d.get('test', 1))
+1
+```
+```
+**Returns**:
+```
+- `SmartGetDict` - SmartGetDict
+#### get
+```python | SmartGetDict.get(key, default=None)
+
+
+## TableOrListWidget
+
+Table/List Widget representation
+**Arguments** :
+i. data _Any_ : a list of data to display(Better use the add_category function to populate the data.
+
+**add_row**
+
+Add a row to the widget.
+**Arguments** :
+i. data _Any_ : the data to add to the list/table.
+
+**to_display**
+
+## TextWidget
+
+Text Widget representation
+**Arguments** :
+i. text _str_ : The text for the widget to display
+
+**to_display**
+
+Text Widget representation
+
+```
+| TableOrListWidget.add_row(data)
+```
+```
+| TableOrListWidget.to_display()
+```
+```
+| TextWidget.to_display()
+```
+
+**Arguments** :
+i. text _str_ : The text for the widget to display
+
+## ThreatIntel
+
+XSOAR Threat Intel Objects
+
+## ObjectsNames
+
+Enum: Threat Intel Objects names.
+i. CAMPAIGN
+ii. ATTACK_PATTERN
+iii. REPORT
+iv. MALWARE
+v. COURSE_OF_ACTION
+vi. INTRUSION_SET
+vii. TOOL
+viii. THREAT_ACTOR
+ix. INFRASTRUCTURE
+x. TACTIC
+
+## ObjectsScore
+
+Enum: Threat Intel Objects Score.
+i. CAMPAIGN
+
+
+```
+ii. ATTACK_PATTERN
+iii. REPORT
+iv. MALWARE
+v. COURSE_OF_ACTION
+vi. INTRUSION_SET
+vii. TOOL
+viii. THREAT_ACTOR
+ix. INFRASTRUCTURE
+x. TACTIC
+```
+## KillChainPhases
+
+Enum: Kill Chain Phases names.
+i. BUILD_CAPABILITIES
+ii. PRIVILEGE_ESCALATION
+iii. ADVERSARY_OPSEC
+iv. CREDENTIAL_ACCESS
+v. EXFILTRATION
+vi. LATERAL_MOVEMENT
+vii. DEFENSE_EVASION
+viii. PERSISTENCE
+ix. COLLECTION
+
+
+x. IMPACT
+xi. INITIAL_ACCESS
+xii. DISCOVERY
+xiii. EXECUTION
+xiv. INSTALLATION
+xv. DELIVERY
+xvi. WEAPONIZATION
+xvii. ACT_ON_OBJECTIVES
+xviii. COMMAND_AND_CONTROL
+
+## TrendWidget
+
+```
+Trend Widget representation
+Arguments :
+i. current_number int : The Current number in the trend.
+ii. previous_number int : The previous number in the trend.
+to_display
+```
+## UpdateRemoteSystemArgs
+
+```
+update-remote-system args parser
+Arguments :
+```
+```
+| TrendWidget.to_display()
+```
+
+```
+i. args dict : arguments for the command of the command.
+```
+## YMLMetadataCollector
+
+The YMLMetadataCollector class provides decorators for integration functions which contain details
+relevant to yml generation.
+This is an empty class, used for code autocompletion when using demisto-sdk
+generate_yml_from_python command syntax. For more information, visit the command's
+README.md.
+**Returns** :
+i. YMLMetadataCollector - The YMLMetadataCollector object
+
+**command**
+
+## _find_relevant_module
+
+Find which module contains the given line number.
+**Arguments** :
+i. trace_str _int_ : Line number to search. (required)
+**Returns** :
+i. str - The name of the module.
+
+```
+inputs_list| YMLMetadataCollector=None, execution.command=None(command_name, file_output, outputs_prefix=False, multiple_output_prefixes=None, outputs_list=False=None,,
+deprecated=False, restore=False, description=None)
+```
+```
+_find_relevant_module(line)
+```
+
+## add_http_prefix_if_missing
+
+This function adds [http://](http://) prefix to the proxy address in case it is missing.
+**Arguments** :
+i. address _string_ : Proxy address.
+**Returns** :
+i. string - proxy address after the 'http://' prefix was added, if needed.
+
+## add_sensitive_log_strs
+
+Adds the received string to both LOG and DebugLogger. The logger will mask the string each time
+he encounters it.
+**Arguments** :
+i. sensitive_str _str_ : The string to be replaced.
+
+## appendContext
+
+Append data to the investigation context
+**Arguments** :
+i. key _str_ : The context path (required)
+
+```
+add_http_prefix_if_missing(address='')
+```
+```
+add_sensitive_log_strs(sensitive_str)
+```
+```
+appendContext(key, data, dedup=False)
+```
+
+```
+ii. data any : Data to be added to the context (required)
+iii. dedup bool : True if de-duplication is required. Default is False.
+```
+## append_metrics
+
+Returns a 'CommandResults' list appended with metrics.
+**Arguments** :
+i. execution_metrics _ExecutionMetrics_ : Metrics object to be added to CommandResults
+list(optional).
+ii. results _list_ : 'CommandResults' list to append metrics to (required).
+**Returns** :
+i. list - results appended with the metrics if the server version is supported.
+
+## argToBoolean
+
+Boolean-ish arguments that are passed through demisto.args() could be type bool or type string.
+This command removes the guesswork and returns a value of type bool, regardless of the input
+value's type. It will also return True for 'yes' and False for 'no'.
+**Arguments** :
+i. value __: the value to evaluate
+**Returns** :
+i. bool - a boolean representatation of 'value'
+
+```
+append_metrics(execution_metrics, results)
+```
+```
+argToBoolean(value)
+```
+
+## argToList
+
+Converts a string representation of args to a python list
+**Arguments** :
+i. arg _str or list_ : Args to be converted (required)
+ii. separator _str_ : A string separator to separate the strings, the default is a comma.
+iii. transform _callable_ : A function transformer to transfer the returned list arguments.
+**Returns** :
+i. list - A python list of args
+
+## arg_to_datetime
+
+Converts an XSOAR argument to a datetime
+This function is used to quickly validate an argument provided to XSOAR via demisto.args() into
+an datetime. It will throw a ValueError if the input is invalid. If the input is None, it will throw a
+ValueError if required is True, or None if required is ``False.
+**Arguments** :
+i. arg _Any_ : argument to convert
+ii. arg_name _str_ : argument name
+iii. is_utc _bool_ : if True then date converted as utc timezone, otherwise will convert with local
+
+```
+argToList(arg, separator=',', transform=None)
+```
+```
+arg_to_datetime(arg, arg_name=None, is_utc=True, required=False, settings=None)
+```
+
+timezone.
+iv. required _bool_ : throws exception if True and argument provided is None
+v. settings _dict_ : If provided, passed to dateparser.parse function.
+returns an datetime if conversion works returns None if arg is None and required is set to
+False otherwise throws an Exception
+**Returns** :
+i. Optional[datetime] -
+
+## arg_to_number
+
+Converts an XSOAR argument to a Python int
+This function is used to quickly validate an argument provided to XSOAR via demisto.args() into
+an int type. It will throw a ValueError if the input is invalid. If the input is None, it will throw a
+ValueError if required is True, or None if required is ``False.
+**Arguments** :
+i. arg _Any_ : argument to convert
+ii. arg_name _str_ : argument name
+iii. required _bool_ : throws exception if True and argument provided is None
+returns an int if arg can be converted returns None if arg is None and required is set to False
+otherwise throws an Exception
+**Returns** :
+i. Optional[int] -
+
+```
+arg_to_number(arg, arg_name=None, required=False)
+```
+
+## assign_params
+
+Creates a dictionary from given kwargs without empty values. empty values are: None, '', [], {}, ()
+**Examples** :
+
+**Arguments** :
+i. keys_to_ignore _tuple or list_ : Keys to ignore if exists
+ii. values_to_ignore _tuple or list_ : Values to ignore if exists
+iii. kwargs _kwargs_ : kwargs to filter
+**Returns** :
+i. dict - dict without empty values
+
+## auto_detect_indicator_type
+
+Infer the type of the indicator.
+
+```
+assign_params(keys_to_ignore=None, values_to_ignore=None,**kwargs)
+```
+```
+{>>>'a' assign_params:'1', 'b': True(a='1'} , b=True, c=None, d='')
+>>>>>> since_time assign_params='timestamp'(values_to_ignore=( 15 , ), sinceTime=since_time, b= 15 )
+{'sinceTime':'timestamp'}
+>>>>>> item_id assign_params='1236654'(keys_to_ignore=['rnd'], ID=item_id, rnd= 15 )
+{'ID':'1236654'}
+```
+```
+auto_detect_indicator_type(indicator_value)
+```
+
+**Arguments** :
+i. indicator_value _str_ : The indicator whose type we want to check. (required)
+**Returns** :
+i. str - The type of the indicator.
+
+## aws_table_to_markdown
+
+Converts a raw response from AWS into a markdown formatted table. This function checks to see if
+there is only one nested dict in the top level of the dictionary and will use the nested data.
+**Arguments** :
+i. response __: Raw response from AWS
+ii. table_header _dict_ : The header string to use for the table.
+**Returns** :
+i. str - Markdown formatted table as a string.
+
+## b64_decode
+
+Decode a str in a base 64 format to a picture. Replaces the use of base64.b64decode function
+which doesn't add padding to the supplied str.
+**Arguments** :
+i. b64_str __: string to decode
+**Returns** :
+
+```
+aws_table_to_markdown(response, table_header)
+```
+```
+b64_decode(b64_str)
+```
+
+```
+i. bytes - decoded binary
+```
+## b64_encode
+
+Base64 encode a string. Wrapper function around base64.b64encode which will accept a string In
+py3 will encode the string to binary using utf-8 encoding and return a string result decoded using
+utf-8
+**Arguments** :
+i. text __: string to encode
+**Returns** :
+i. str - encoded string
+
+## batch
+
+Gets an iterable and yields slices of it.
+**Arguments** :
+i. iterable _list_ : list or other iterable object.
+ii. batch_size _int_ : the size of batches to fetch
+**Returns** :
+i. list -
+
+```
+b64_encode(text)
+```
+```
+batch(iterable, batch_size= 1 )
+```
+
+## build_dbot_entry
+
+Build a dbot entry. if score is 3 adds malicious
+**Examples** :
+
+**Arguments** :
+i. indicator _str_ : indicator field. if using file hashes, can be dict
+ii. indicator_type _str_ : type of indicator ('url, 'domain', 'ip', 'cve', 'email', 'md5', 'sha1', 'sha256',
+'crc32', 'sha512', 'ctph')
+iii. vendor _str_ : Integration ID
+iv. score _int_ : DBot score (0-3)
+
+```
+build_dbot_entrybuild_malicious=(Trueindicator) , indicator_type, vendor, score, description=None,
+```
+```
+{>>>'DBotScore' build_dbot_entry: {'Indicator'('user@example.com':'user@example.com', 'Email',,'Type''Vendor':'email',^1 ) ,'Vendor':'Vendor',
+'Score': 1 }}
+>>>build_malicious build_dbot_entry=False('user@example.com') , 'Email','Vendor', 3 ,
+{'Score''DBotScore': 3 }}: {'Indicator':'user@example.com','Type':'email','Vendor':'Vendor',
+```
+```
+{>>>'DBotScore' build_dbot_entry: {'Vendor'('user@example.com':'Vendor','Indicator', 'email':,'user@example.com''Vendor',^3 , 'Malicious email','Score': 3 , )
+'Type''Account.Email(val.Address && val.Address == obj.Address)': 'email'}, \ : {'Malicious': {'Vendor':
+'Vendor''Malicious email','Description'}, 'Address': \ :'user@example.com'}}
+```
+```
+{>>>'DBotScore' build_dbot_entry: {'Indicator'('md5hash':'md5hash','md5',,'Vendor''Type':,'file'^1 ) , 'Vendor':'Vendor','Score':
+1 }}
+```
+
+v. description _str or None_ : description (will be added to malicious if dbot_score is 3). can be
+None
+vi. build_malicious _bool_ : if True, will add a malicious entry
+**Returns** :
+i. dict - dbot entry
+
+## build_malicious_dbot_entry
+
+Build Malicious dbot entry
+**Examples** :
+
+**Arguments** :
+i. indicator _str_ : Value (e.g. 8.8.8.8)
+ii. indicator_type _str_ : e.g. 'IP'
+iii. vendor _str_ : Integration ID
+
+```
+build_malicious_dbot_entry(indicator, indicator_type, vendor, description=None)
+```
+```
+{>>>'IP(val.Address && val.Address == obj.Address)' build_malicious_dbot_entry('8.8.8.8','ip','Vendor': {'Malicious','Google DNS': {'Vendor') :'Vendor',
+'Description''}, 'Address': ': 'Google DNS\8.8.8.8'}}
+```
+```
+{>>>'File build_malicious_dbot_entry(val.MD5 && val.MD5 == obj('md5hash'.MD5 || val,'MD5'.SHA1 , 'Vendor'&& val.SHA1 ,'Malicious File'== obj.SHA1 ||)
+val 256 .SHA256 || val.&&SHA512 val.SHA256 && val.==SHA512 obj.SHA\== obj.SHA512 || val.CRC32 && val.CRC32 == obj.CRC32
+H || val|| val.CTPH .SSDeep && val&&. valCTPH .SSDeep == obj.==CTP\ obj.SSDeep)': {'Malicious': {'Vendor': 'Vendor',
+',Description'MD5':'md5hash'': 'Malicious File'}} }\
+```
+
+iv. description _str_ : Why it's malicious
+**Returns** :
+i. dict - A malicious DBot entry
+
+## calculate_new_offset
+
+This calculates the new offset based on the response
+**Arguments** :
+i. old_offset _int_ : The offset from the previous run
+ii. num_incidents _int_ : The number of incidents returned by the API.
+iii. total_incidents _int_ : The total number of incidents returned by the API.
+**Returns** :
+i. int - The new offset for the next run.
+
+## camel_case_to_underscore
+
+Converts a camelCase string to snake_case
+**Arguments** :
+i. s _str_ : The string to convert (e.g. helloWorld) (required)
+**Returns** :
+
+```
+calculate_new_offset(old_offset, num_incidents, total_incidents)
+```
+```
+camel_case_to_underscore(s)
+```
+
+```
+i. str - The converted string (e.g. hello_world)
+```
+## camelize
+
+Convert all keys of a dictionary (or list of dictionaries) to CamelCase (with capital first letter)
+**Arguments** :
+i. src _dict or list_ : The dictionary (or list of dictionaries) to convert the keys for. (required)
+ii. delim _str_ : The delimiter between two words in the key (e.g. delim=' ' for "Start Date"). Default '
+'.
+iii. upper_camel _bool_ : When True then transforms dictionary keys to camel case with the first
+letter capitalised (for example: demisto_content to DemistoContent), otherwise the first letter
+will not be capitalised (for example: demisto_content to demistoContent).
+**Returns** :
+i. dict or list - The dictionary (or list of dictionaries) with the keys in CamelCase.
+
+## camelize_string
+
+Transform snake_case to CamelCase
+**Arguments** :
+i. src_str _str_ : snake_case string to convert.
+ii. delim _str_ : indicator category.
+iii. upper_camel _bool_ : When True then transforms string to camel case with the first letter
+
+```
+camelize(src, delim=' ', upper_camel=True)
+```
+```
+camelize_string(src_str, delim='_', upper_camel=True)
+```
+
+capitalised (for example: demisto_content to DemistoContent), otherwise the first letter will not
+be capitalised (for example: demisto_content to demistoContent).
+**Returns** :
+i. str - A CammelCase string.
+
+## censor_request_logs
+
+Censors the request logs generated from the urllib library directly by replacing sensitive information
+such as tokens and cookies with a mask. In most cases, the sensitive value is the first word after the
+keyword, but in some cases, it is the second one.
+**Arguments** :
+i. request_log __: The request log to censor
+**Returns** :
+i. str - The censored request log
+
+## comma_separated_mapping_to_dict
+
+Transforming a textual comma-separated mapping into a dictionary object.
+**Arguments** :
+i. raw_text _str_ : Comma-separated mapping e.g ('key1=value1', 'key2=value2', ...)
+**Returns** :
+i. dict -
+
+```
+censor_request_logs(request_log)
+```
+```
+comma_separated_mapping_to_dict(raw_text)
+```
+
+## content_profiler
+
+A decorator for profiling the execution time and performance of a function.
+This decorator is useful for identifying performance bottlenecks and understanding the time
+complexity of your code. It collects and displays detailed profiling information, including the total
+execution time, the number of calls, and the average time per call. When to use it:
+i. When you need to debug and optimize the performance of your functions or methods.
+ii. When you want to identify slow or inefficient parts of your code.
+iii. During the development and testing phases to ensure that your code meets performance
+requirements.
+To use, decorate the function that calls the function you want to profile with @content_profiler.
+Example: I want to profile the function_to_profile() function:
+
+Analyze the Profiling Data with SnakeViz: Download the <automation_name>.prof from the war
+room and run: pip install snakeviz; snakveiz <automation_name>.prof
+**Tested with Python 3.10
+Arguments** :
+i. func _function_ : The function to be profiled.
+**Returns** :
+i. any - The profiled function.
+
+```
+content_profiler(func)
+```
+```
+@content_profilerfunction_to_profile():
+# some code
+```
+
+## convert_dict_values_bytes_to_str
+
+Converts byte dict values to str
+**Arguments** :
+i. input_dict _dict_ : dict to converts its values.
+**Returns** :
+i. dict - dict contains str instead of bytes.
+
+## createContext
+
+Receives a dict with flattened key values, and converts them into nested dicts
+**Arguments** :
+i. data _dict or list_ : The data to be added to the context (required)
+ii. id _str_ : The ID of the context entry
+iii. keyTransform _function_ : A formatting function for the markdown table headers
+iv. removeNull _bool_ : True if empty columns should be removed, false otherwise
+**Returns** :
+i. list - The converted context list
+
+## createContextSingle
+
+```
+convert_dict_values_bytes_to_str(input_dict)
+```
+```
+createContext(data,id=None, keyTransform=None, removeNull=False)
+```
+
+Receives a dict with flattened key values, and converts them into nested dicts
+**Arguments** :
+i. obj _dict or list_ : The data to be added to the context (required)
+ii. id _str_ : The ID of the context entry
+iii. keyTransform _function_ : A formatting function for the markdown table headers
+iv. removeNull _bool_ : True if empty columns should be removed, false otherwise
+**Returns** :
+i. list - The converted context list
+
+## create_clickable_url
+
+Make the given url clickable when in markdown format by concatenating itself, with the proper
+brackets
+**Arguments** :
+i. url _Union[List[str], str]_ : the url of interest or a list of urls
+ii. text _Union[List[str], str, None]_ : the text of the url or a list of texts of urls.
+**Returns** :
+i. Union[List[str], str] - Markdown format for clickable url
+
+## create_indicator_result_with_dbotscore_unkn
+
+```
+createContextSingle(obj,id=None, keyTransform=None, removeNull=False)
+```
+```
+create_clickable_url(url, text=None)
+```
+
+## own
+
+Used for cases where the api response to an indicator is not found, returns CommandResults with
+readable_output generic in this case, and indicator with DBotScore unknown
+**Arguments** :
+i. indicator _str_ : The value of the indicator
+ii. indicator_type _DBotScoreType_ : use DBotScoreType class [Unsupport in types CVE and
+ATTACKPATTERN]
+iii. reliability _DBotScoreReliability_ : use DBotScoreReliability class
+iv. context_prefix _str_ : Use only in case that the indicator is CustomIndicator
+v. address_type _str_ : Use only in case that the indicator is Cryptocurrency
+vi. relationships _list of EntityRelationship_ : List of relationships of the indicator.
+**Returns** :
+i. CommandResults -
+
+## create_updated_last_run_object
+
+Calculates the next fetch time and limit depending the incidents result and creates an updated
+LastRun object with the new time and limit.
+**Arguments** :
+
+```
+create_indicator_result_with_dbotscore_unknownreliability=None, context_prefix=None, address_type(indicator=None,, indicator_type relationships=,None)
+```
+```
+create_updated_last_run_objectstart_fetch_time, end_fetch_time(last_run, created_time_field, incidents, fetch_limit, date_format, look_back='%Y-%m-%dT%H:%M:,
+%S', increase_last_run_time=False, new_offset=None)
+```
+
+i. last_run _dict_ : The LastRun object
+ii. incidents _list_ : List of the incidents result
+iii. fetch_limit _int_ : The fetch limit
+iv. look_back _int_ : The time to look back in fetch in minutes
+v. start_fetch_time _str_ : The time the fetch started to fetch from
+vi. end_fetch_time _str_ : The end time in which the fetch incidents ended
+vii. created_time_field _str_ : The incident created time field
+viii. date_format _str_ : The date format
+ix. increase_last_run_time _bool_ : Whether to increase the last run time with one millisecond
+x. new_offset _int | None_ : The new offset to set in the last run
+**Returns** :
+i. Dict - The new LastRun object
+
+## date_to_timestamp
+
+Parses date_str_or_dt in the given format (default: %Y-%m-%dT%H:%M:%S) to milliseconds
+Examples: ('2018-11-06T08:56:41', '2018-11-06T08:56:41', etc.)
+**Arguments** :
+i. date_str_or_dt _str or datetime.datetime_ : The date to be parsed. (required)
+ii. date_format _str_ : The date format of the date string (will be ignored if date_str_or_dt is of type
+datetime.datetime). (optional)
+**Returns** :
+
+```
+date_to_timestamp(date_str_or_dt, date_format='%Y-%m-%dT%H:%M:%S')
+```
+
+```
+i. int - The parsed timestamp.
+```
+## datetime_to_string
+
+Converts a datetime object into a string. When used with json.dumps() for the default
+parameter, e.g. json.dumps(response, default=datetime_to_string) datetime_to_string allows
+entire JSON objects to be safely added to context without causing any datetime marshalling errors.
+**Arguments** :
+i. datetime_obj __: Datetime object.
+**Returns** :
+i. str - String representation of a datetime object.
+
+## detect_file_indicator_type
+
+Detect the type of the file indicator.
+**Arguments** :
+i. indicator_value _str_ : The indicator whose type we want to check. (required)
+**Returns** :
+i. str - The type of the indicator.
+
+## dict_safe_get
+
+```
+datetime_to_string(datetime_obj)
+```
+```
+detect_file_indicator_type(indicator_value)
+```
+
+Recursive safe get query (for nested dicts and lists), If keys found return value otherwise return
+None or default value. Example:
+**Examples** :
+
+**Arguments** :
+i. dict_object _dict_ : dictionary to query.
+ii. keys _list_ : keys for recursive get.
+iii. default_return_value _object_ : Value to return when no key available.
+iv. return_type _type_ : Excepted return type.
+v. raise_return_type _bool_ : Whether to raise an error when the value didn't match the expected
+return type.
+**Returns** :
+i. object -
+
+## doubleBackslashes
+
+Double any backslashes in the given string if it contains two backslashes.
+**Arguments** :
+
+```
+dict_safe_getraise_return_type(dict_object=True) , keys, default_return_value=None, return_type=None,
+```
+```
+>>>>>> data dict_safe_get= {"something"(data, [: {'something'"test":"A", }}'test'])
+>>>>>> dict_safe_get'A' (data, ['something', 'else'],'default value')
+>>>'default value'
+```
+```
+doubleBackslashes(st)
+```
+
+i. st _str_ : The string to be modified (required).
+**Returns** :
+i. str - A modified string with doubled backslashes.
+
+## elem2json
+
+Convert an ElementTree or Element into a JSON string.
+
+## elem_to_internal
+
+Convert an Element into an internal dictionary (not JSON!).
+
+## encode_string_results
+
+Encode string as utf-8, if any unicode character exists.
+**Arguments** :
+i. text __: string to encode
+**Returns** :
+i. str - encoded string
+
+```
+elem2json(elem, options, strip_ns= 1 , strip= 1 )
+```
+```
+elem_to_internal(elem, strip_ns= 1 , strip= 1 )
+```
+```
+encode_string_results(text)
+```
+
+## ensure_proxy_has_http_prefix
+
+The function checks if proxy environment vars are missing http/https prefixes, and adds http if so.
+
+## execute_command
+
+Runs the demisto.executeCommand() function and checks for errors.
+**Arguments** :
+i. command _str_ : The command to run. (required)
+ii. args _dict_ : The command arguments. (required)
+iii. extract_contents _bool_ : Whether to return only the Contents part of the results. Default is
+True.
+iv. fail_on_error _bool_ : Whether to fail the command when receiving an error from the command.
+Default is True.
+**Returns** :
+i. `` - The command results.
+ii. When fail_on_error is True - list or dict or str.
+iii. When fail_on_error is False -bool and str.
+Note: For backward compatibility, only when fail_on_error is set to False, two values will be
+returned.
+
+## fileResult
+
+```
+ensure_proxy_has_http_prefix()
+```
+```
+execute_command(command, args, extract_contents=True, fail_on_error=True)
+```
+
+Creates a file from the given data
+**Arguments** :
+i. filename _str_ : The name of the file to be created (required)
+ii. data _str or bytes_ : The file data (required)
+iii. file_type _str_ : one of the entryTypes file or entryInfoFile (optional)
+**Returns** :
+i. dict - A Demisto war room entry
+
+## file_result_existing_file
+
+Rename an existing file
+**Arguments** :
+i. filename _str_ : The name of the file to be modified (required)
+ii. saveFilename _str_ : The new file name
+**Returns** :
+i. dict - A Demisto war room entry
+
+## filter_incidents_by_duplicates_and_limit
+
+```
+fileResult(filename, data, file_type=None)
+```
+```
+file_result_existing_file(filename, saveFilename=None)
+```
+```
+filter_incidents_by_duplicates_and_limitid_field) (incidents_res, last_run, fetch_limit,
+```
+
+Removes duplicate incidents from response and returns the incidents till limit. The function should
+be called after getting the get-incidents API response, and by passing the id_field it will filter out the
+incidents that were already fetched by checking the incident IDs that are saved from the previous
+fetch in the last run object
+**Arguments** :
+i. incidents_res _list_ : The incidents from the API response
+ii. last_run _dict_ : The LastRun object
+iii. fetch_limit _int_ : The incidents limit to return
+iv. id_field _str_ : The incident id field
+**Returns** :
+i. list - List of incidents after filtering duplicates when len(incidents) <= limit
+
+## find_and_remove_sensitive_text
+
+Finds all appearances of sensitive information in a string using regex and adds the sensitive
+information to the list of strings that should not appear in any logs. The regex pattern can be used to
+search for a specific word, or a pattern such as a word after a given word.
+**Examples** :
+
+```
+find_and_remove_sensitive_text(text, pattern)
+```
+```
+>>>>>> text pattern = "first secret is ID123 and the second secret is id321 and the token: ABC"=r'(token:\s*)(\S+)' # Capturing groups: (token:\s*) and (\S+)
+>>>Sensitive text added to be masked find_and_remove_sensitive_text( in text the logs, pattern: ABC)
+>>>>>> pattern find_and_remove_sensitive_text=r'\bid\w*\b' # Match words starting with "id", case insensitive (text, pattern)
+Sensitive text added to be masked in the logs: ID123 and id321
+```
+
+**Arguments** :
+i. text __: The input text containing the sensitive information.
+ii. pattern _str_ : The regex pattern to match the sensitive information.
+
+## fix_traceback_line_numbers
+
+Fixes the given traceback line numbers.
+**Arguments** :
+i. trace_str _str_ : The traceback string to edit. (required)
+**Returns** :
+i. str - The new formated traceback.
+
+## flattenCell
+
+Flattens a markdown table cell content into a single string
+**Arguments** :
+i. data _str or list_ : The cell content (required)
+ii. is_pretty _bool_ : Should cell content be pretified (default is True)
+**Returns** :
+i. str - A sting representation of the cell content
+
+```
+fix_traceback_line_numbers(trace_str)
+```
+```
+flattenCell(data, is_pretty=True)
+```
+
+## flattenRow
+
+Flatten each element in the given rowDict
+**Arguments** :
+i. rowDict _dict_ : The dict to be flattened (required)
+**Returns** :
+i. dict - A flattened dict
+
+## flattenTable
+
+Flatten each row in the given tableDict
+**Arguments** :
+i. tableDict _dict_ : The table to be flattened (required)
+**Returns** :
+i. dict - A flattened table
+
+## formatAllArgs
+
+makes a nice string representation of all the arguments
+
+```
+flattenRow(rowDict)
+```
+```
+flattenTable(tableDict)
+```
+```
+formatAllArgs(args, kwds)
+```
+
+**Arguments** :
+i. args _list_ : function arguments (required)
+ii. kwds _dict_ : function keyword arguments (required)
+**Returns** :
+i. string - string representation of all the arguments
+
+## formatCell
+
+Convert a given object to md while decending multiple levels
+**Arguments** :
+i. data _str or list or dict_ : The cell content (required)
+ii. is_pretty _bool_ : Should cell content be prettified (default is True)
+iii. json_transform _JsonTransformer_ : The Json transform object to transform the data
+**Returns** :
+i. str - The formatted cell content as a string
+
+## formatEpochDate
+
+Convert a time expressed in seconds since the epoch to a string representing local time
+**Arguments** :
+
+```
+formatCell(data, is_pretty=True, json_transform=None)
+```
+```
+formatEpochDate(t)
+```
+
+i. t _int_ : Time represented in seconds (required)
+**Returns** :
+i. str - A string representing local time
+
+## generic_http_request
+
+A wrapper for the BaseClient._http_request() method, that allows performing HTTP requests without
+initiating a BaseClient object. Note: Avoid using this method if unnecessary. It is more recommended
+to use the BaseClient class.
+Args: method (str): HTTP request method (e.g., GET, POST, PUT, DELETE). server_url (str): Base
+URL of the server. timeout (int, optional): Timeout in seconds for the request (defaults to 10). verify
+(bool, optional): Whether to verify SSL certificates (defaults to True). proxy (bool or str, optional):
+Use a proxy server. Can be a boolean (defaults to False) or a proxy URL string. client_headers (dict,
+optional): Additional headers to be included in all requests made by the client (overrides headers
+argument). headers (dict, optional): Additional headers for this specific request. url_suffix (str,
+optional): Path suffix to be appended to the server URL. data (object, optional): Data to be sent in
+the request body (e.g., dictionary for POST requests). ok_codes (list of int, optional): A list of HTTP
+status codes that are considered successful responses (defaults to [200]). auth (tuple, optional):
+Authentication credentials (username, password) for the request. error_handler (callable, optional):
+Function to handle request errors. files (dict, optional): Dictionary of files to be uploaded (for
+multipart/form-data requests). params (dict, optional): URL parameters to be included in the request.
+retries (int, optional): Number of times to retry the request on failure (defaults to 0). retries (int,
+optional): Number of times to retry the request on failure (defaults to 0). status_list_to_retry (int,
+optional): A set of integer HTTP status codes that we should force a retry on. A retry is initiated if the
+request method is in ['GET', 'POST', 'PUT'] and the response status code is in
+status_list_to_retry. resp_type (iterable, optional): Determines which data format to return from
+the HTTP request. The default is 'json'. json_data (dict, optional): The dictionary to send in a 'POST'
+request. backoff_factor (float, optional): A backoff factor to apply between attempts after the second
+try (most errors are resolved immediately by a second try without a delay). urllib3 will sleep for::
+
+generic_http_requestclient_headers=None,( headersmethod, server_url=None, url_suffix, timeout=None= (^60) ,, data verify=None=True, ok_codes, proxy==FalseNone,,
+authstatus_list_to_retry=None, error_handler=None=None, json_data, files==NoneNone,, params return_empty_response=None, retries= (^0) =,False resp_type, ='json',
+backoff_factorempty_valid_codes= 5 , raise_on_redirect=None, params_parser=False=None, raise_on_status, with_metrics=False=False,,**kwargs)
+
+
+{backoff factor} * (2 ** ({number of total retries} - 1))
+seconds. If the backoff_factor is 0.1, then :func:.sleep will sleep for [0.0s, 0.2s, 0.4s, ...] between
+retries. It will never be longer than :attr:Retry.BACKOFF_MAX.
+By default, backoff_factor set to 5
+raise_on_redirect (bool, optional): Whether, if the number of redirects is exhausted, to raise a
+MaxRetryError, or to return a response with a response code in the 3xx range.
+raise_on_status (bool,optional): Similar meaning to raise_on_redirect: whether we should raise
+an exception, or return a response, if status falls in status_forcelist range and retries have been
+exhausted.
+empty_valid_codes (list, optional): A list of all valid status codes of empty responses (usually only
+204, but can vary)
+return_empty_response (bool, optional): Whether to return an empty response body if the response
+code is in empty_valid_codes
+params_parser (callable, optional): How to quote the params. By default, spaces are replaced with
++ and / to %2F. see here for more info: https://docs.python.org/3/library/
+urllib.parse.html#urllib.parse.urlencode Note! supported only in python3.
+with_metrics (bool, optional): Whether or not to calculate execution metrics from the response
+Returns:
+**Returns** :
+i. dict or str or bytes or xml.etree.ElementTree.Element or requests.Response - Depends
+on the resp_type parameter
+Raises: exceptions.RequestException: If an error occurs during the request.
+
+## get_current_time
+
+```
+get_current_time(time_zone= 0 )
+```
+
+Gets the current time in a given timezone, as time awared datetime.
+**Arguments** :
+i. time_zone _int_ : The time zone offset in hours.
+**Returns** :
+i. datetime - The current time.
+
+## get_demisto_version_as_str
+
+Get the Demisto Server version as a string <version>-<build>. If unknown will return: 'Unknown'.
+Meant to be use in places where we want to display the version. If you want to perform logic based
+upon vesrion use: is_demisto_version_ge.
+**Returns** :
+i. dict - Demisto version as string
+
+## get_engine_base_url
+
+Gets the xsoar engine id and returns it's base url. For example: for engine_id =
+'4ccccccc-5aaa-4000-b666-dummy_id', base url = '11.180.111.111:1443'.
+**Arguments** :
+i. engine_id _str_ : The xsoar engine id.
+**Returns** :
+i. str - The base URL of the engine.
+
+```
+get_demisto_version_as_str()
+```
+```
+get_engine_base_url(engine_id)
+```
+
+## get_error
+
+execute_command_result must contain error entry - check the result first with is_error function if
+there is no error entry in the result then it will raise an Exception
+**Arguments** :
+i. execute_command_result _dict or list_ : result of demisto.executeCommand()
+**Returns** :
+i. string - Error message extracted from the demisto.executeCommand() result
+
+## get_feed_last_run
+
+This function gets the feed's last run: using demisto.getLastRun().
+**Returns** :
+i. dict -
+
+## get_fetch_run_time_range
+
+Calculates the time range for fetch depending the look_back argument and the previous fetch start
+time given from the last_run object.
+
+```
+get_error(execute_command_result)
+```
+```
+get_feed_last_run()
+```
+```
+get_fetch_run_time_rangedate_format='%Y-%m-%dT%H:%M:%S'(last_run) , first_fetch, look_back= 0 , timezone= 0 ,
+```
+
+**Arguments** :
+i. last_run _dict_ : The LastRun object
+ii. first_fetch _str_ : The first time to fetch, used in the first fetch of an instance
+iii. look_back _int_ : The time to look back in fetch in minutes
+iv. timezone _int_ : The time zone offset in hours
+v. date_format _str_ : The date format
+**Returns** :
+i. Tuple - The time range (start_time, end_time) of the creation date for the incidents to fetch in
+the current run.
+
+## get_found_incident_ids
+
+Gets the found incident ids from the last run object and adds the new fetched incident IDs.
+**Arguments** :
+i. last_run _dict_ : The LastRun object
+ii. incidents _list_ : List of incidents to add
+iii. look_back _int_ : The look back time in minutes
+iv. id_field _str_ : The incident id field
+**Returns** :
+i. dict - The new incident ids.
+
+```
+get_found_incident_ids(last_run, incidents, look_back, id_field, remove_incident_ids)
+```
+
+## get_hash_type
+
+Checks the type of the given hash. Returns 'md5', 'sha1', 'sha256' or 'Unknown'.
+**Arguments** :
+i. hash_file _str_ : The hash to be checked (required)
+**Returns** :
+i. str - The hash type
+
+## get_integration_context
+
+Gets the integration context.
+**Arguments** :
+i. sync _bool_ : Whether to get the integration context directly from the DB.
+ii. with_version _bool_ : Whether to return the version.
+**Returns** :
+i. dict -
+
+## get_integration_context_with_version
+
+```
+get_hash_type(hash_file)
+```
+```
+get_integration_context(sync=True, with_version=False)
+```
+```
+get_integration_context_with_version(sync=True)
+```
+
+Get the latest integration context with version, if available.
+**Arguments** :
+i. sync _bool_ : Whether to get the context directly from the DB.
+**Returns** :
+i. tuple -
+
+## get_integration_instance_name
+
+Getting calling integration instance name
+**Returns** :
+i. str - Calling integration instance name
+
+## get_integration_name
+
+Getting calling integration's name
+**Returns** :
+i. str - Calling integration's name
+
+## get_last_mirror_run
+
+```
+get_integration_instance_name()
+```
+```
+get_integration_name()
+```
+```
+get_last_mirror_run()
+```
+
+This function gets the last run of the mirror, from XSOAR version 6.6.0, using
+demisto.getLastMirrorRun(). Before XSOAR version 6.6.0, the given data is not returned and an
+exception will be raised.
+**Returns** :
+i. dict - we did not set anything yet).
+
+## get_latest_incident_created_time
+
+Gets the latest incident created time
+**Arguments** :
+i. incidents _list_ : List of incidents
+ii. created_time_field _str_ : The incident created time field
+iii. date_format _str_ : The date format
+iv. increase_last_run_time _bool_ : Whether to increase the last run time with one millisecond
+**Returns** :
+i. str - The latest incident time
+
+## get_message_classes_dump
+
+A function that returns the printable message about classes dump
+**Arguments** :
+
+```
+%dT%H:%M:%S'get_latest_incident_created_time, increase_last_run_time(incidents=False,) created_time_field, date_format='%Y-%m-
+```
+```
+get_message_classes_dump(classes_as_list)
+```
+
+i. classes_as_list _list_ : The classes to print to the log
+**Returns** :
+i. str - Message to print.
+
+## get_message_global_vars
+
+A function that returns the printable message about global variables
+**Returns** :
+i. str - Message to print.
+
+## get_message_local_vars
+
+A function that returns the printable message about local variables
+**Returns** :
+i. str - Message to print.
+
+## get_message_memory_dump
+
+Listener function to dump the memory to log info
+**Arguments** :
+
+```
+get_message_global_vars()
+```
+```
+get_message_local_vars()
+```
+```
+get_message_memory_dump(_sig, _frame)
+```
+
+i. _sig _int_ : The signal number
+ii. _frame _Any_ : The current stack frame
+**Returns** :
+i. str - Message to print.
+
+## get_message_modules_sizes
+
+A function that returns the printable message about the loaded modules by size
+**Returns** :
+i. str - Message to print.
+
+## get_message_threads_dump
+
+Listener function to dump the threads to log info
+**Arguments** :
+i. _sig _int_ : The signal number
+ii. _frame _Any_ : The current stack frame
+**Returns** :
+i. str - Message to print.
+
+```
+get_message_modules_sizes()
+```
+```
+get_message_threads_dump(_sig, _frame)
+```
+
+## get_pack_version
+
+Get a pack version. The version can be retrieved either by a pack name or by the calling script/
+integration in which script/integration is part of.
+To get the version of the pack in which the calling script/integration is part of, just call the function
+without pack_name.
+**Arguments** :
+i. pack_name _str_ : the pack name as mentioned in the pack metadata file to query its version. use
+only if querying by a pack name.
+case provided. in case not found returns empty string.
+**Returns** :
+i. str - The pack version in which the integration/script is part of / the version of the requested
+pack name in
+
+## get_schedule_metadata
+
+Get the entry schedule metadata if available
+**Arguments** :
+i. context _dict_ : Context in which the command was executed.
+**Returns** :
+i. dict - Dict with metadata of scheduled entry
+
+```
+get_pack_version(pack_name='')
+```
+```
+get_schedule_metadata(context)
+```
+
+## get_script_name
+
+Getting calling script name
+**Returns** :
+i. str - Calling script name
+
+## get_server_config
+
+Retrieves XSOAR server configuration.
+**Returns** :
+i. dict -
+
+## get_size_of_object
+
+A function that recursively iterate to sum size of object & members.
+**Arguments** :
+i. input_object _Any_ : The object to calculate its memory footprint
+**Returns** :
+i. int - Size of input_object in bytes, or -1 if cannot determine the size.
+
+```
+get_script_name()
+```
+```
+get_server_config()
+```
+```
+get_size_of_object(input_object)
+```
+
+## get_tenant_account_name
+
+Gets the tenant name from the server url.
+**Returns** :
+i. str - The account name.
+
+## get_x_content_info_headers
+
+Get X-Content-* headers to send in outgoing requests to use when performing requests to external
+services such as oproxy.
+**Returns** :
+i. dict - headers dict
+
+## handle_proxy
+
+Handle logic for routing traffic through the system proxy. Should usually be called at the beginning of
+the integration, depending on proxy checkbox state.
+Additionally will unset env variables REQUESTS_CA_BUNDLE and CURL_CA_BUNDLE if
+handle_insecure is speficied (default). This is needed as when these variables are set and a
+requests.Session object is used, requests will ignore the Sesssion.verify setting. See: https://
+github.com/psf/requests/blob/master/requests/sessions.py#L703
+
+```
+get_tenant_account_name()
+```
+```
+get_x_content_info_headers()
+```
+```
+handle_proxyhandle_insecure(proxy_param_name=True, insecure_param_name='proxy', checkbox_default_value=None) =False,
+```
+
+**Arguments** :
+i. proxy_param_name _string_ : name of the "use system proxy" integration parameter
+ii. checkbox_default_value _bool_ : Default value of the proxy param checkbox
+iii. handle_insecure _bool_ : Whether to check the insecure param and unset env variables
+iv. insecure_param_name _string_ : Name of insecure param. If None will search insecure and
+unsecure
+**Returns** :
+i. dict - proxies dict for the 'proxies' parameter of 'requests' functions
+
+## handle_proxy_for_long_running
+
+Handle logic for long running integration routing traffic through the system proxy. Should usually be
+called at the beginning of the integration, depending on proxy checkbox state. Long running
+integrations on hosted tenants XSOAR8 and XSIAM has a dedicated env. var.:
+CRTX_HTTP_PROXY. Fallback call to handle_proxy in cases long running integration on engine or
+XSOAR6
+**Arguments** :
+i. proxy_param_name _string_ : name of the "use system proxy" integration parameter
+ii. checkbox_default_value _bool_ : Default value of the proxy param checkbox
+iii. handle_insecure _bool_ : Whether to check the insecure param and unset env variables
+iv. insecure_param_name _string_ : Name of insecure param. If None will search insecure and
+unsecure
+**Returns** :
+
+```
+handle_proxy_for_long_runninghandle_insecure=True, insecure_param_name(proxy_param_name=None=)'proxy', checkbox_default_value=False,
+```
+
+```
+i. Tuple[dict, boolean] - proxies dict for the 'proxies' parameter of 'requests' functions and
+use_ssl boolean
+```
+## has_passed_time_threshold
+
+Checks if the time difference between the current time and the timestamp is greater than the
+threshold.
+**Arguments** :
+i. timestamp_str _str_ : The timestamp to compare the current time to.
+ii. seconds_threshold _int_ : The threshold in seconds.
+**Returns** :
+i. bool - True if the time difference is greater than the threshold, otherwise False.
+
+## hash_djb2
+
+Hash string with djb2 hash function
+**Arguments** :
+i. s _str_ : The input string to hash
+ii. seed _int_ : The seed for the hash function (default is 5381)
+**Returns** :
+i. int - The hashed value
+
+```
+has_passed_time_threshold(timestamp_str, seconds_threshold)
+```
+```
+hash_djb2(s, seed= 5381 )
+```
+
+## indicators_value_to_clickable
+
+Function to get the indicator url link for indicators
+**Arguments** :
+i. indicators _dict + List[dict]_ : An indicator or a list of indicators
+**Returns** :
+i. dict -
+
+## internal_to_elem
+
+Convert an internal dictionary (not JSON!) into an Element. Whatever Element implementation we
+could import will be used by default; if you want to use something else, pass the Element class as
+the factory parameter.
+
+## isCommandAvailable
+
+Check the list of available modules to see whether a command is currently available to be run.
+**Arguments** :
+i. cmd _str_ : The command to check (required)
+**Returns** :
+
+```
+indicators_value_to_clickable(indicators)
+```
+```
+internal_to_elem(pfsh, factory=ET.Element)
+```
+```
+isCommandAvailable(cmd)
+```
+
+```
+i. bool - True if command is available, False otherwise
+```
+## is_debug_mode
+
+Return if this script/command was passed debug-mode=true option
+**Returns** :
+i. bool - true if debug-mode is enabled
+
+## is_demisto_version_ge
+
+Utility function to check if current running integration is at a server greater or equal to the passed
+version
+**Arguments** :
+i. version _str_ : Version to check
+ii. build_number _str_ : Build number to check
+**Returns** :
+i. bool - True if running within a Server version greater or equal than the passed version
+
+## is_error
+
+```
+is_debug_mode()
+```
+```
+is_demisto_version_ge(version, build_number='')
+```
+```
+is_error(execute_command_result)
+```
+
+Check if the given execute_command_result has an error entry
+**Arguments** :
+i. execute_command_result _dict or list_ : Demisto entry (required) or result of
+demisto.executeCommand()
+**Returns** :
+i. bool - True if the execute_command_result has an error entry, false otherwise
+
+## is_filename_valid
+
+Checking if the file name contains invalid characters.
+**Arguments** :
+i. filename __: The file name
+**Returns** :
+i. bool - True if valid otherwise False.
+
+## is_integration_command_execution
+
+This function determines whether the current execution a script execution or a integration command
+execution.
+**Returns** :
+i. bool - Is the current execution a script execution or a integration command execution.
+
+```
+is_filename_valid(filename)
+```
+```
+is_integration_command_execution()
+```
+
+## is_integration_instance_running_on_engine
+
+Determines whether the current integration instance runs on an xsoar engine. If yes - returns the
+engine id.
+**Returns** :
+i. str - The engine id iff the instance is running on an xsaor engine.
+
+## is_ip_valid
+
+Checks if the given string represents a valid IP address. By default, will only return 'True' for IPv4
+addresses.
+**Arguments** :
+i. s _str_ : The string to be checked (required)
+ii. accept_v6_ips _bool_ : A boolean determining whether the function should accept IPv6
+addresses
+**Returns** :
+i. bool - True if the given string represents a valid IP address, False otherwise
+
+## is_ipv6_valid
+
+Checks if the given string represents a valid IPv6 address.
+
+```
+is_integration_instance_running_on_engine()
+```
+```
+is_ip_valid(s, accept_v6_ips=False)
+```
+```
+is_ipv6_valid(address)
+```
+
+**Arguments** :
+i. address _str_ : The string to check.
+**Returns** :
+i. bool - True if the given string represents a valid IPv6 address.
+
+## is_mac_address
+
+Test for valid mac address
+**Arguments** :
+i. mac _str_ : MAC address in the form of AA:BB:CC:00:11:22
+**Returns** :
+i. bool - True/False
+
+## is_scheduled_command_retry
+
+Determines if the current command is a polling retry command. This is useful if some actions should
+not be performed when a command is polling for a response such as submitting data for processing.
+**Returns** :
+i. Bool - True if the command is part of a polling retry, otherwise false
+
+## is_time_sensitive
+
+```
+is_mac_address(mac)
+```
+```
+is_scheduled_command_retry()
+```
+
+Checks if the command reputation (auto-enrichment) is called as auto-extract=inline. This function
+checks if the 'isTimeSensitive' attribute exists in the 'demisto' object and if it's set to True.
+**Returns** :
+i. bool - bool
+
+## is_using_engine
+
+Determines whether or not the platform is using engine. NOTE:
+i. This method works only for system integrations (not custom).
+ii. On xsoar 8, this method works only for integrations that runs on the xsoar pod - not on the
+engine-0 (mainly long running integrations) such as: EDL, Cortex Core - IOC, Cortex Core - IR,
+ExportIndicators, Generic Webhook, PingCastle, Publish List, Simple API Proxy, Syslog v2,
+TAXII Server, TAXII2 Server, Web File Repository, Workday_IAM_Event_Generator, XSOAR-
+Web-Server, Microsoft Teams, AWS-SNS-Listener.
+**Returns** :
+i. bool - True iff the platform is using engine.
+
+## is_versioned_context_available
+
+Determines whether versioned integration context is available according to the server version.
+**Returns** :
+
+```
+is_time_sensitive()
+```
+```
+is_using_engine()
+```
+```
+is_versioned_context_available()
+```
+
+```
+i. bool -
+```
+## is_xsiam
+
+Determines whether or not the platform is XSIAM.
+**Returns** :
+i. bool - True iff the platform is XSIAM.
+
+## is_xsiam_or_xsoar_saas
+
+Determines whether or not the platform is XSIAM or XSOAR SAAS.
+**Returns** :
+i. bool - True iff the platform is XSIAM or XSOAR SAAS.
+
+## is_xsoar
+
+Determines whether or not the platform is XSOAR.
+**Returns** :
+i. bool - True iff the platform is XSOAR.
+
+```
+is_xsiam()
+```
+```
+is_xsiam_or_xsoar_saas()
+```
+```
+is_xsoar()
+```
+
+## is_xsoar_hosted
+
+Determines whether or not the platform is XSOAR hosted.
+**Returns** :
+i. bool - True iff the platform is XSOAR hosted.
+
+## is_xsoar_on_prem
+
+Determines whether or not the platform is a XSOAR on-prem.
+**Returns** :
+i. bool - True iff the platform is XSOAR on-prem.
+
+## is_xsoar_saas
+
+Determines whether or not the platform is XSOAR SAAS.
+**Returns** :
+i. bool - True iff the platform is XSOAR SAAS.
+
+## json2elem
+
+```
+is_xsoar_hosted()
+```
+```
+is_xsoar_on_prem()
+```
+```
+is_xsoar_saas()
+```
+
+Convert a JSON string into an Element. Whatever Element implementation we could import will be
+used by default; if you want to use something else, pass the Element class as the factory parameter.
+
+## json2xml
+
+Convert a JSON string into an XML string. Whatever Element implementation we could import will
+be used by default; if you want to use something else, pass the Element class as the factory
+parameter.
+
+## logger
+
+decorator function to log the function call using LOG
+**Arguments** :
+i. func _function_ : function to call (required)
+**Returns** :
+i. any - returns the func return value.
+
+## merge_lists
+
+Replace values in a list with those in an updated list. Example:
+**Examples** :
+
+```
+json2elem(json_data, factory=ET.Element)
+```
+```
+json2xml(json_data, factory=ET.Element)
+```
+```
+logger(func)
+```
+```
+merge_lists(original_list, updated_list, key)
+```
+
+**Arguments** :
+i. original_list _list_ : The original list.
+ii. updated_list _list_ : The updated list.
+iii. key _str_ : The key to replace elements by.
+**Returns** :
+i. list -
+
+## parse_date_range
+
+THIS FUNCTTION IS DEPRECATED - USE dateparser.parse instead
+Parses date_range string to a tuple date strings (start, end). Input must be in format 'number
+date_range_unit') Examples: (2 hours, 4 minutes, 6 month, 1 day, etc.)
+**Arguments** :
+i. date_range _str_ : The date range to be parsed (required)
+ii. date_format _str_ : Date format to convert the date_range to. (optional)
+iii. to_timestamp _bool_ : If set to True, then will return time stamp rather than a datetime.datetime.
+
+```
+>>>'11' original ,'updated'=[{:'id''n'}]:'1','updated':'n'}, {'id': '2','updated':'n'}, {'id':
+>>>'updated' updated : 'n'=[{, 'id': '1', 'updated': 'y'}, {'id':'3','updated':'y'}, {'id': '11',
+>>>'remove':True}]
+>>>'updated' result : ='y'[{}]'id':'1','updated':'y'}, {'id':'2', 'updated': 'n'}, {'id':'3',
+```
+```
+parse_date_rangeutc=True) (date_range, date_format=None, to_timestamp=False, timezone= 0 ,
+```
+
+(optional)
+iv. timezone _int_ : timezone should be passed in hours (e.g if +0300 then pass 3, if -0200 then
+pass -2).
+v. utc _bool_ : If set to True, utc time will be used, otherwise local time.
+**Returns** :
+i. (datetime.datetime, datetime.datetime) or (int, int) or (str, str) - The parsed date
+range.
+
+## parse_date_string
+
+Parses the date_string function to the corresponding datetime object. Note: If possible (e.g. running
+Python 3), it is suggested to use dateutil.parser.parse or dateparser.parse functions instead.
+**Examples** :
+
+**Arguments** :
+i. date_string _str_ : The date string to parse. (required)
+ii. date_format _str_ : The date format of the date string. If the date format is known, it should be
+provided. (optional)
+**Returns** :
+
+```
+parse_date_string(date_string, date_format='%Y-%m-%dT%H:%M:%S')
+```
+```
+>>>datetime parse_date_string.datetime( 2019 ('2019-09-17T06:16:39Z', 9 , 17 , 6 , 16 , 39 ) )
+>>>datetime parse_date_string.datetime( 2019 ('2019-09-17T06:16:39.22Z', 9 , 17 , 6 , 16 , 39 , 220000 ))
+>>>datetime parse_date_string.datetime( 2019 ('2019-09-17T06:16:39.4040+05:00', 9 , 17 , 6 , 16 , 39 , 404000 ) ,'%Y-%m-%dT%H:%M:%S+02:00')
+```
+
+```
+i. (datetime.datetime, datetime.datetime) - The parsed datetime.
+```
+## parse_json_string
+
+Parse a JSON string into a Python dictionary.
+**Arguments** :
+i. json_string _str_ : The JSON string to be parsed.
+**Returns** :
+i. dict -
+
+## pascalToSpace
+
+Converts pascal strings to human readable (e.g. "ThreatScore" -> "Threat Score",
+"thisIsIPAddressName" -> "This Is IP Address Name"). Could be used as headerTransform
+**Arguments** :
+i. s _str_ : The string to be converted (required)
+**Returns** :
+i. str - The converted string
+
+## polling_function
+
+```
+parse_json_string(json_string)
+```
+```
+pascalToSpace(s)
+```
+```
+polling_function(name, interval= 30 , timeout= 600 , poll_message='Fetching Results:',
+```
+
+To use on a function that should rerun itself Commands that use this decorator must have a Polling
+argument, polling: true in yaml, and a hidden hide_polling_output argument. Commands that use
+this decorator should return a PollResult. Will raise an DemistoException if the server version
+doesn't support Scheduled Commands (< 6.2.0)
+**Arguments** :
+i. name _str_ : The name of the command
+ii. interval _int_ : How many seconds until the next run
+iii. timeout _int_ : How long
+iv. poll_message _str_ : The message to display in the war room while polling
+v. requires_polling_arg _bool_ : Whether a polling argument should be expected as one of the
+demisto args
+**Returns** :
+i. Function - Decorator for polling functions
+
+## positiveFile
+
+Checks if the given entry from a file reputation query is positive (known bad) (deprecated)
+**Arguments** :
+i. entry _dict_ : File entry (required)
+**Returns** :
+i. bool - True if bad, false otherwise
+
+```
+polling_arg_name="polling", requires_polling_arg=True)
+```
+```
+positiveFile(entry)
+```
+
+## positiveIp
+
+Checks if the given entry from a file reputation query is positive (known bad) (deprecated)
+**Arguments** :
+i. entry _dict_ : IP entry (required)
+**Returns** :
+i. bool - True if bad, false otherwise
+
+## positiveUrl
+
+Checks if the given entry from a URL reputation query is positive (known bad) (deprecated)
+**Arguments** :
+i. entry _dict_ : URL entry (required)
+**Returns** :
+i. bool - True if bad, false otherwise
+
+## register_module_line
+
+Register a module in the line mapping for the traceback line correction algorithm.
+
+```
+positiveIp(entry)
+```
+```
+positiveUrl(entry)
+```
+```
+register_module_line(module_name, start_end, line, wrapper= 0 )
+```
+
+**Arguments** :
+i. module_name _str_ : The name of the module. (required)
+ii. start_end _str_ : Whether to register the line as the start or the end of the module. Possible
+values: start, end. (required)
+iii. line _int_ : the line number to record. (required)
+iv. wrapper _int_ : Wrapper size (used for inline replacements with headers such as ApiModules).
+(optional)
+
+## register_signal_handler_profiling_dump
+
+Function that registers the threads and memory dump signal listener
+**Arguments** :
+i. profiling_dump_rows_limit _int_ : The max number of profiling related rows to print to the log
+ii. profiling_dump_rows_limit _int_ : The max number of profiling related rows to print to the log
+
+## remove_duplicates_from_list_arg
+
+Removes duplicates from a list after calling argToList. For example: args: {'ids': "1,2,1"}, field='ids'
+The return output will be ["1", "2"]
+**Arguments** :
+i. args _dict_ : Args to be converted (required)
+
+```
+register_signal_handler_profiling_dumpprofiling_dump_rows_limit=PROFILING_DUMP_ROWS_LIMIT(signal_type=None) ,
+```
+```
+remove_duplicates_from_list_arg(args, field)
+```
+
+ii. field _str_ : Field in args to be converted into list without duplicates (required)
+**Returns** :
+i. list - A python list of args without duplicates
+
+## remove_empty_elements
+
+Recursively remove empty lists, empty dicts, or None elements from a dictionary.
+**Arguments** :
+i. d __: Input dictionary.
+**Returns** :
+i. dict - Dictionary with all empty lists, and empty dictionaries removed.
+
+## remove_nulls_from_dictionary
+
+Remove Null values from a dictionary. (updating the given dictionary)
+**Arguments** :
+i. data _dict_ : The data to be added to the context (required)
+
+## remove_old_incidents_ids
+
+```
+remove_empty_elements(d)
+```
+```
+remove_nulls_from_dictionary(data)
+```
+```
+remove_old_incidents_ids(found_incidents_ids, current_time, look_back)
+```
+
+Removes old incident ids from the last run object to avoid overloading.
+**Arguments** :
+i. found_incidents_ids _dict_ : Dict of incidents ids
+ii. current_time _int_ : The current epoch time to compare with the existing IDs added time
+iii. look_back _int_ : The look back time in minutes
+**Returns** :
+i. dict - The new incidents ids
+
+## replace_in_keys
+
+Replace a substring in all of the keys of a dictionary (or list of dictionaries)
+**Arguments** :
+i. src _dict or list_ : The dictionary (or list of dictionaries) with keys that need replacement.
+(required)
+ii. existing _str_ : substring to replace.
+iii. new _str_ : new substring that will replace the existing substring.
+**Returns** :
+i. dict or list - The dictionary (or list of dictionaries) with keys after substring replacement.
+
+## replace_spaces_in_credential
+
+```
+replace_in_keys(src, existing='.', new='_')
+```
+```
+replace_spaces_in_credential(credential)
+```
+
+This function is used in case of credential from type: 9 is in the wrong format of one line with spaces
+instead of multiple lines.
+**Arguments** :
+i. credential _str or None_ : the credential to replace spaces in.
+otherwise the credential will be returned as is.
+
+## response_to_context
+
+Recursively creates a data dictionary where all key starts with capital letters. If a key include
+underscores, removes underscores, capitalize every word. Example: "one_two" to "OneTwo
+**Arguments** :
+i. reponse_obj _Any_ : The response object to update. :user_predefiend_keys: An optional
+argument, a dict with predefined keys where the key is the key in the response and value is the
+key we want to turn the key into.
+**Returns** :
+i. Any - A response with all keys (if there're any) starts with a capital letter.
+
+## retry
+
+retries to execute a function until an exception isn't raised anymore.
+**Arguments** :
+i. times _int_ : The number of times to trigger the retry mechanism.
+
+```
+response_to_context(reponse_obj, user_predefiend_keys=None)
+```
+```
+retry(times= 3 , delay= 1 , exceptions=Exception)
+```
+
+ii. delay _int_ : The time in seconds to sleep between each time
+iii. exceptions _Exception_ : The exceptions that should be caught when executing the function
+(Union[tuple[type[Exception], ...], type[Exception]])
+**Returns** :
+i. Any - Any
+
+## return_error
+
+Returns error entry with given message and exits the script
+**Arguments** :
+i. message _str_ : The message to return to the entry (required)
+ii. error _str or Exception_ : The raw error message to log (optional)
+iii. outputs _dict or None_ : the outputs that will be returned to playbook/investigation context
+(optional)
+**Returns** :
+i. dict - Error entry object
+
+## return_outputs
+
+DEPRECATED: use return_results() instead
+This function wraps the demisto.results(), makes the usage of returning results to the user more
+
+```
+return_error(message, error='', outputs=None)
+```
+```
+return_outputsignore_auto_extract(readable_output=False) , outputs=None, raw_response=None, timeline=None,
+```
+
+intuitively.
+**Arguments** :
+i. readable_output _str | int_ : markdown string that will be presented in the warroom, should be
+human readable - (HumanReadable)
+ii. outputs _dict_ : the outputs that will be returned to playbook/investigation context (originally
+EntryContext)
+iii. raw_response _dict | list | str_ : must be dictionary, if not provided then will be equal to outputs.
+usually must be the original raw response from the 3rd party service (originally Contents)
+iv. timeline _dict | list_ : expects a list, if a dict is passed it will be put into a list. used by server to
+populate an indicator's timeline. if the 'Category' field is not present in the timeline dict(s), it will
+automatically be be added to the dict(s) with its value set to 'Integration Update'.
+v. ignore_auto_extract _bool_ : expects a bool value. if true then the warroom entry
+readable_output will not be auto enriched.
+
+## return_results
+
+This function wraps the demisto.results(), supports.
+**Arguments** :
+i. results _CommandResults or PollResult or str or dict or BaseWidget or list or
+GetMappingFieldsResponse or GetModifiedRemoteDataResponse or
+GetRemoteDataResponse_ : A result object to return as a War-Room entry.
+
+## return_warning
+
+```
+return_results(results)
+```
+```
+return_warningignore_auto_extract(message=False, exit) =False, warning='', outputs=None,
+```
+
+Returns a warning entry with the specified message, and exits the script.
+**Arguments** :
+i. message _str_ : The message to return in the entry (required).
+ii. exit _bool_ : Determines if the program will terminate after the command is executed. Default is
+False.
+iii. warning _str_ : The warning message (raw) to log (optional).
+iv. outputs _dict or None_ : The outputs that will be returned to playbook/investigation context
+(optional).
+v. ignore_auto_extract _bool_ : Determines if the War Room entry will be auto-enriched. Default is
+false.
+**Returns** :
+i. dict - Warning entry object
+
+## safe_load_json
+
+Safely loads a JSON object from an argument. Allows the argument to accept either a JSON in
+string form, or an entry ID corresponding to a JSON file.
+**Arguments** :
+i. json_object __: Entry ID or JSON string.
+**Returns** :
+i. dict - Dictionary object from a parsed JSON file or string.
+
+## safe_sleep
+
+```
+safe_load_json(json_object)
+```
+
+Sleeps for the given duration, but raises an error if it would exceed the TTL.
+**Arguments** :
+i. duration_seconds _float_ : The desired sleep duration in seconds.
+
+## scoreToReputation
+
+Converts score (in number format) to human readable reputation format
+**Arguments** :
+i. score _int_ : The score to be formatted (required)
+**Returns** :
+i. str - The formatted score
+
+## sectionsToMarkdown
+
+Converts a list of Demisto JSON tables to markdown string of tables
+**Arguments** :
+i. root _dict or list_ : The JSON table - List of dictionaries with the same keys or a single dictionary
+(required)
+**Returns** :
+
+```
+safe_sleep(duration_seconds)
+```
+```
+scoreToReputation(score)
+```
+```
+sectionsToMarkdown(root)
+```
+
+```
+i. str - A string representation of the markdown table
+```
+## send_data_to_xsiam
+
+Send the supported fetched data types into the XDR data-collector private api.
+**Arguments** :
+i. data _Union[str, list]_ : The data to send to XSIAM server. Should be of the following:
+
+1. List of strings or dicts where each string or dict represents an event or asset.
+2. String containing raw events separated by a new line.
+    i. vendor _str_ : The vendor corresponding to the integration that originated the data.
+ii. product _str_ : The product corresponding to the integration that originated the data.
+iii. data_format _str_ : Should only be filled in case the 'events' parameter contains a string of raw
+events in the format of 'leef' or 'cef'. In other cases the data_format will be set automatically.
+iv. url_key _str_ : The param dict key where the integration url is located at. the default is 'url'.
+v. num_of_attempts _int_ : The num of attempts to do in case there is an api limit (429 error codes)
+vi. chunk_size _int_ : Advanced - The maximal size of each chunk size we send to API. Limit of 9
+MB will be inforced.
+vii. data_type _str_ : Type of data to send to Xsiam, events or assets.
+viii. should_update_health_module _bool_ : whether to trigger the health module showing how many
+events were sent to xsiam This can be useful when using send_data_to_xsiam in batches for
+the same fetch.
+ix. add_proxy_to_request _bool_ : whether to add proxy to the send evnets request.
+
+```
+send_data_to_xsiamnum_of_attempts= 3 ,( chunk_sizedata, vendor=XSIAM_EVENT_CHUNK_SIZE, product, data_format,= data_typeNone, url_key=EVENTS='url', ,
+should_update_health_moduleitems_count=None, multiple_threads=True, add_proxy_to_request=False) =False, snapshot_id='',
+```
+
+x. snapshot_id _str_ : the snapshot id.
+xi. items_count _str_ : the asset snapshot items count.
+xii. multiple_threads _bool_ : whether to use multiple threads to send the events to xsiam or not.
+Note that when set to True, the updateModuleHealth should be done from the itnegration itself.
+In case of running with multiple threads, the list of futures will hold the number of events sent and
+can be accessed by: for future in concurrent.futures.as_completed(futures): data_size +=
+future.result()
+
+## send_events_to_xsiam
+
+Send the fetched events into the XDR data-collector private api.
+**Arguments** :
+i. events _Union[str, list]_ : The events to send to XSIAM server. Should be of the following:
+
+1. List of strings or dicts where each string or dict represents an event.
+2. String containing raw events separated by a new line.
+    i. vendor _str_ : The vendor corresponding to the integration that originated the events.
+ii. product _str_ : The product corresponding to the integration that originated the events.
+iii. data_format _str_ : Should only be filled in case the 'events' parameter contains a string of raw
+events in the format of 'leef' or 'cef'. In other cases the data_format will be set automatically.
+iv. url_key _str_ : The param dict key where the integration url is located at. the default is 'url'.
+v. num_of_attempts _int_ : The num of attempts to do in case there is an api limit (429 error codes)
+vi. chunk_size _int_ : Advanced - The maximal size of each chunk size we send to API. Limit of 9
+MB will be inforced.
+
+```
+send_events_to_xsiamnum_of_attempts= 3 , chunk_size(events, vendor=XSIAM_EVENT_CHUNK_SIZE, product, data_format, =None, url_key='url',
+should_update_health_module=True, add_proxy_to_request=False, multiple_threads=False)
+```
+
+vii. should_update_health_module _bool_ : whether to trigger the health module showing how many
+events were sent to xsiam
+viii. add_proxy_to_request _bool_ : whether to add proxy to the send evnets request.
+ix. multiple_threads _bool_ : whether to use multiple threads to send the events to xsiam or not.
+In case of running with multiple threads, the list of futures will hold the number of events sent and
+can be accessed by: for future in concurrent.futures.as_completed(futures): data_size +=
+future.result()
+
+## set_feed_last_run
+
+This function sets the feed's last run: using demisto.setLastRun().
+**Arguments** :
+i. last_run_indicators _dict_ : Indicators to save in "lastRun" object.
+
+## set_integration_context
+
+Sets the integration context.
+**Arguments** :
+i. context _dict_ : The context to set.
+ii. sync _bool_ : Whether to save the context directly to the DB.
+iii. version _Any_ : The version of the context to set.
+**Returns** :
+
+```
+set_feed_last_run(last_run_indicators)
+```
+```
+set_integration_context(context, sync=True, version=- 1 )
+```
+
+```
+i. dict -
+```
+## set_last_mirror_run
+
+This function sets the last run of the mirror, from XSOAR version 6.6.0, by using
+demisto.setLastMirrorRun(). Before XSOAR version 6.6.0, we don't set the given data and an
+exception will be raised.
+**Arguments** :
+i. last_mirror_run _dict_ : Data to save in the "LastMirrorRun" object.
+
+## set_to_integration_context_with_retries
+
+Update the integration context with a dictionary of keys and values with multiple attempts. The
+function supports merging the context keys using the provided object_keys parameter. If the version
+is too old by the time the context is set, another attempt will be made until the limit after a random
+sleep.
+**Arguments** :
+i. context _dict_ : A dictionary of keys and values to set.
+ii. object_keys _dict_ : A dictionary to map between context keys and their unique ID for merging
+them.
+iii. sync _bool_ : Whether to save the context directly to the DB.
+iv. max_retry_times _int_ : The maximum number of attempts to try.
+
+```
+set_last_mirror_run(last_mirror_run)
+```
+```
+set_to_integration_context_with_retriesmax_retry_times=CONTEXT_UPDATE_RETRY_TIMES(context) , object_keys=None, sync=True,
+```
+
+## shortCrowdStrike
+
+Display CrowdStrike Intel results in Markdown (deprecated)
+**Arguments** :
+i. entry _dict_ : CrowdStrike result entry (required)
+**Returns** :
+i. dict - A Demisto entry containing the shortened CrowdStrike info
+
+## shortDomain
+
+Formats a domain reputation entry into a short table (deprecated)
+**Arguments** :
+i. entry _dict_ : Domain result entry (required)
+**Returns** :
+i. dict - A Demisto entry containing the shortened domain info
+
+## shortFile
+
+Formats a file reputation entry into a short table (deprecated)
+
+```
+shortCrowdStrike(entry)
+```
+```
+shortDomain(entry)
+```
+```
+shortFile(entry)
+```
+
+**Arguments** :
+i. entry _dict_ : File result entry (required)
+**Returns** :
+i. dict - A Demisto entry containing the shortened file info
+
+## shortIp
+
+Formats an ip reputation entry into a short table (deprecated)
+**Arguments** :
+i. entry _dict_ : IP result entry (required)
+**Returns** :
+i. dict - A Demisto entry containing the shortened IP info
+
+## shortUrl
+
+Formats a URL reputation entry into a short table (deprecated)
+**Arguments** :
+i. entry _dict_ : URL result entry (required)
+**Returns** :
+i. dict - A Demisto entry containing the shortened URL info
+
+```
+shortIp(entry)
+```
+```
+shortUrl(entry)
+```
+
+## shorten_string_for_printing
+
+Function that removes the middle of a long str, for printint or logging. If needed, it will replace the
+middle with '...',
+**Examples** :
+
+**Arguments** :
+i. source_string _str_ : A long str that needs shortening.
+ii. max_length _int_ : Maximum length of the returned str, should be higher than 0. Default is 64.
+**Returns** :
+i. str - : A string no longer than max_length.
+
+## signal_handler_profiling_dump
+
+Listener function to dump the threads and memory to log info
+**Arguments** :
+i. _sig _int_ : The signal number
+
+```
+shorten_string_for_printing(source_string, max_length= 64 )
+```
+```
+>>>'123456789' shorten_string_for_printing('123456789', 9 )
+>>>'abc...890' shorten_string_for_printing('1234567890', 9 )
+>>>'1234...012' shorten_string_for_printing('123456789012', 10 )
+```
+```
+signal_handler_profiling_dump(_sig, _frame)
+```
+
+```
+ii. _frame Any : The current stack frame
+```
+## skip_cert_verification
+
+The function deletes the self signed certificate env vars in order to http requests to skip certificate
+validation.
+
+## skip_proxy
+
+The function deletes the proxy environment vars in order to http requests to skip routing through
+proxy
+
+## snakify
+
+Convert all keys of a dictionary to snake_case (underscored separated)
+**Arguments** :
+i. src _dict_ : The dictionary to convert the keys for. (required)
+**Returns** :
+i. dict - The dictionary (or list of dictionaries) with the keys in CamelCase.
+
+## split_data_to_chunks
+
+```
+skip_cert_verification()
+```
+```
+skip_proxy()
+```
+```
+snakify(src)
+```
+
+Splits a string of data into chunks of an approximately specified size. The actual size can be lower.
+**Arguments** :
+i. data _list or a string_ : A list of data or a string delimited with \n to split to chunks.
+ii. target_chunk_size _int_ : The maximum size of each chunk. The maximal size allowed is 9MB.
+**Returns** :
+i. collections.Iterable[list] - An iterable of lists where each list contains events with approx
+size of chunk size.
+
+## stringEscape
+
+Escape newline chars in the given string.
+**Arguments** :
+i. st _str_ : The string to be modified (required).
+**Returns** :
+i. str - A modified string.
+
+## stringEscapeMD
+
+Escape any chars that might break a markdown string
+
+```
+split_data_to_chunks(data, target_chunk_size)
+```
+```
+stringEscape(st)
+```
+```
+stringEscapeMD(st, minimal_escaping=False, escape_multiline=False)
+```
+
+**Arguments** :
+i. st _str_ : The string to be modified (required)
+ii. minimal_escaping _bool_ : Whether replace all special characters or table format only (optional)
+iii. escape_multiline _bool_ : Whether convert line-ending characters (optional)
+**Returns** :
+i. str - A modified string
+
+## stringUnEscape
+
+Unescape newline chars in the given string.
+**Arguments** :
+i. st _str_ : The string to be modified (required).
+**Returns** :
+i. str - A modified string.
+
+## string_to_context_key
+
+Checks if string, removes underscores, capitalize every word. Example: "one_two" to "OneTwo"
+**Arguments** :
+i. string _str_ : The string to be converted (required)
+
+```
+stringUnEscape(st)
+```
+```
+string_to_context_key(string)
+```
+
+**Returns** :
+i. str - The converted string
+
+## string_to_table_header
+
+Checks if string, change underscores to spaces, capitalize every word. Example: "one_two" to "One
+Two"
+**Arguments** :
+i. string _str_ : The string to be converted (required)
+**Returns** :
+i. str - The converted string
+
+## support_multithreading
+
+Adds lock on the calls to the Cortex XSOAR server from the Demisto object to support integration
+which use multithreading.
+
+## tableToMarkdown
+
+Converts a demisto table in JSON form to a Markdown table
+
+```
+string_to_table_header(string)
+```
+```
+support_multithreading()
+```
+```
+tableToMarkdownmetadata=None, url_keys(name, t,= headersNone, date_fields=None, headerTransform=None, json_transform_mapping=None, removeNull==NoneFalse, ,
+is_auto_json_transform=False, sort_headers=True)
+```
+
+**Arguments** :
+i. name _str_ : The name of the table (required)
+ii. t _dict or list_ : The JSON table - List of dictionaries with the same keys or a single dictionary
+(required)
+iii. headers _list or string_ : A list of headers to be presented in the output table (by order). If string
+will be passed then table will have single header. Default will include all available headers.
+iv. headerTransform _function_ : A function that formats the original data headers (optional)
+v. removeNull _bool_ : Remove empty columns from the table. Default is False
+vi. metadata _str_ : Metadata about the table contents
+vii. url_keys _list_ : a list of keys in the given JSON table that should be turned in to clickable
+viii. date_fields _list_ : A list of date fields to format the value to human-readable output.
+ix. json_transform_mapping _Dict[str, JsonTransformer]_ : A mapping between a header key to
+corresponding JsonTransformer
+x. is_auto_json_transform _bool_ : Boolean to try to auto transform complex json
+xi. sort_headers _bool_ : Sorts the table based on its headers only if the headers parameter is not
+specified
+**Returns** :
+i. str - A string representation of the markdown table
+
+## timestamp_to_datestring
+
+Parses timestamp (milliseconds) to a date string in the provided date format (by default: ISO 8601
+format) Examples: (1541494441222, 1541495441000, etc.)
+
+```
+timestamp_to_datestringis_utc=False) (timestamp, date_format="%Y-%m-%dT%H:%M:%S.000Z",
+```
+
+**Arguments** :
+i. timestamp _int or str_ : The timestamp to be parsed (required)
+ii. date_format _str_ : The date format the timestamp should be parsed to. (optional)
+iii. is_utc _bool_ : Should the string representation of the timestamp use UTC time or the local
+machine time
+**Returns** :
+i. str - The parsed timestamp in the date_format
+
+## underscoreToCamelCase
+
+Convert an underscore separated string to camel case
+**Arguments** :
+i. s _str_ : The string to convert (e.g. hello_world) (required)
+ii. upper_camel _bool_ : When True then transforms dictionarykeys to camel case with the first letter
+capitalised (for example: demisto_content to DemistoContent), otherwise the first letter will not
+be capitalised (for example: demisto_content to demistoContent).
+**Returns** :
+i. str - The converted string (e.g. HelloWorld)
+
+## update_integration_context
+
+Update the integration context with a given dictionary after merging it with the latest integration
+
+```
+underscoreToCamelCase(s, upper_camel=True)
+```
+```
+update_integration_context(context, object_keys=None, sync=True)
+```
+
+context.
+**Arguments** :
+i. context _dict_ : The keys and values to update in the integration context.
+ii. object_keys _dict_ : A dictionary to map between context keys and their unique ID for merging
+them with the latest context.
+iii. sync _bool_ : Whether to use the context directly from the DB.
+**Returns** :
+i. tuple -
+
+## update_last_run_object
+
+Updates the LastRun object with the next fetch time and limit and with the new fetched incident IDs.
+**Arguments** :
+i. last_run _dict_ : The LastRun object
+ii. incidents _list_ : List of the incidents result
+iii. fetch_limit _int_ : The fetch limit
+iv. start_fetch_time _str_ : The time the fetch started to fetch from
+v. end_fetch_time _str_ : The end time in which the fetch incidents ended
+vi. look_back _int_ : The time to look back in fetch in minutes
+vii. created_time_field _str_ : The incident created time field
+
+```
+update_last_run_objectend_fetch_time, look_back(last_run, created_time_field, incidents, fetch_limit, id_field,, start_fetch_time date_format='%Y-%m-%dT%H:%M:,
+%S', increase_last_run_time=False, new_offset=None)
+```
+
+viii. id_field _str_ : The incident id field
+ix. date_format _str_ : The date format
+x. increase_last_run_time _bool_ : Whether to increase the last run time with one millisecond
+xi. new_offset _int | None_ : The new offset to set in the last run
+**Returns** :
+i. Dict - The updated LastRun object
+
+## url_to_clickable_markdown
+
+Turn the given urls fields in to clickable url, used for the markdown table.
+**Arguments** :
+i. data _[Union[str, List[Any], Dict[str, Any]]]_ : a dictionary or a list containing data with some
+values that are urls
+ii. url_keys _List[str]_ : the keys of the url's wished to turn clickable
+**Returns** :
+i. [Union[str, List[Any], Dict[str, Any]]] - markdown format for clickable url
+
+## urljoin
+
+Will join url and its suffix
+Example: "https://google.com/", "/" => "https://google.com/" "https://google.com", "/" => "https://
+
+```
+url_to_clickable_markdown(data, url_keys)
+```
+```
+urljoin(url, suffix="")
+```
+
+google.com/" "https://google.com", "api" => "https://google.com/api" "https://google.com", "/api" =>
+"https://google.com/api" "https://google.com/", "api" => "https://google.com/api" "https://
+google.com/", "/api" => "https://google.com/api"
+**Arguments** :
+i. url _string_ : URL string (required)
+ii. suffix _string_ : the second part of the url
+**Returns** :
+i. string - Full joined url
+
+## vtCountPositives
+
+Counts the number of detected URLs in the entry
+**Arguments** :
+i. entry _dict_ : Demisto entry (required)
+**Returns** :
+i. int - The number of detected URLs
+
+## xml2json
+
+Convert an XML string into a JSON string.
+**Arguments** :
+
+```
+vtCountPositives(entry)
+```
+```
+xml2json(xmlstring, options={}, strip_ns= 1 , strip= 1 )
+```
+
+i. xmlstring _str_ : The string to be converted (required)
+**Returns** :
+i. dict or list - The converted JSON
+
+## xsiam_api_call_with_retries
+
+Send the fetched events or assests into the XDR data-collector private api.
+**Arguments** :
+i. client _BaseClient_ : base client containing the XSIAM url.
+ii. xsiam_url _str_ : The URL of XSIAM to send the api request.
+iii. zipped_data _bytes_ : encoded events
+iv. headers _dict_ : headers for the request
+v. error_msg _str_ : The error message prefix in case of an error.
+vi. num_of_attempts _int_ : The num of attempts to do in case there is an api limit (429 error codes).
+vii. events_error_handler _callable_ : error handler function
+viii. data_type _str_ : events or assets
+**Returns** :
+i. requests.Response or DemistoException - Response object or DemistoException
+
+```
+Edit this page
+```
+```
+xsiam_api_call_with_retriesevents_error_handler=None, error_msg(client, xsiam_url='', is_json_response, zipped_data=,False headers, data_type, num_of_attempts=EVENTS) ,
+```
+
+**Report an Issue**
+
+

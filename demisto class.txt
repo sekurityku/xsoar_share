@@ -1,0 +1,1080 @@
+# Demisto Class
+
+### All Python integrations and scripts have available as part of the runtime the demisto class object.
+
+### The object exposes a series of API methods which are used to retrieve and send data to the Cortex
+
+### XSOAR Server.
+
+#### NOTE
+
+### The demisto class is a low level API. For many operations we provide a simpler and more
+
+### robust API as part of the Common Server Functions.
+
+## _apiCall
+
+### Special apiCall to internal xdr api. Only available to OOB content.
+
+### Arguments :
+
+### i. name - name of the api (currently only wfReportIncorrectVerdict is supported)
+
+### ii. params - url query args to pass. Use a dictionary such as: `{"key":"value"}
+
+### iii. data - POST data as a string. Make sure to json.dumps.
+
+### iv. headers - headers to pass. Use a dictionary such as: {"key":"value"}
+
+### v. method - HTTP method to use.
+
+### vi. path - path to append to the base url.
+
+### vii. timeout - The amount of time (in seconds) that a request will wait for a client to send data
+
+### before the request is aborted.
+
+```
+demisto._apiCall(name=None, params=None, data=None, headers=None, method=None,
+path=None, timeout=None, response_data_type=None)
+```
+
+### viii. response_data_type - The type of the response. should be None unless the response value is
+
+### binary then it should be 'bin'.
+
+### *Note if data is empty then a GET request is performed instead of a POST.
+
+### Returns :
+
+### i. dict - The response of the api call
+
+## addEntry
+
+### (Integration only) Adds an entry to a mirrored investigation war room
+
+### Arguments :
+
+### i. id str - Incident ID to add the entry in
+
+### ii. entry str - The text to add in the entry
+
+### iii. username str - The username of the user to be the entry creator (Default value = None)
+
+### iv. email str - The email address of the user to be the entry creator (Default value = None)
+
+### v. footer str - The email address of the user to be the entry creator (Default value = None)
+
+### Returns :
+
+### i. None - No data returned
+
+## args
+
+### Retrieves a command / script arguments object
+
+### Returns :
+
+```
+demisto.addEntry(id, entry, username=None, email=None, footer=None)
+```
+```
+demisto.args()
+```
+
+### i. dict - Arguments object
+
+## command
+
+### (Integration only) Retrieves the integration command that is being run
+
+### Returns :
+
+### i. str - Integrations command name
+
+## context
+
+### Retrieves the context data object of the current incident
+
+### Returns :
+
+### i. dict - Context data object
+
+## createIncidents
+
+### (Integration only) Creates incident in long running execution
+
+### Arguments :
+
+### i. incidents list - List of incident objects to create, with the following optional keys:
+
+### i. name (str)
+
+### ii. type (str) - If not provided, an Unclassified incident will be created
+
+```
+demisto.command()
+```
+```
+demisto.context()
+```
+```
+demisto.createIncidents(incidents, lastRun=None, userID=None)
+```
+
+### iii. labels (list) - List of {"type": , "value": } objects
+
+### iv. rawJSON (str) - Will be omitted after the classification & mapping step
+
+### v. occurred (str)
+
+### vi. details (str)
+
+### vii. severity (int)
+
+### ii. lastRun dict - the LastRun object to set (Default value = None)
+
+### iii. userID str - The user associated with the request (Default value = None)
+
+### Returns :
+
+### Union[list, dict]: Created incident object
+
+## createIndicators
+
+### (Integration only) Creates indicators from given indicator objects batch
+
+### Arguments :
+
+### i. indicators_batch list - List of indicators objects to create
+
+### ii. noUpdate bool - No update on fetched feed (no new indicators to fetch), Available from Server
+
+### version 6.5.0.
+
+### Returns :
+
+### i. None - No data returned
+
+## credentials
+
+### (Integration only) For integrations that support fetching credentials. Send the fetched credentials to
+
+### the server.
+
+```
+demisto.createIndicators(indicators_batch, noUpdate=False)
+```
+```
+demisto.credentials(credentials)
+```
+
+### Arguments :
+
+### i. credentials list - List of credential objects
+
+### Returns :
+
+### i. None - No data returned
+
+## debug
+
+### Prints a message to the server logs in debug level
+
+### Arguments :
+
+### i. msg str - The message to be logged
+
+### ii. args dict - Additional arguments to log
+
+### Returns :
+
+### i. None - No data returned
+
+## demistoUrls
+
+### Retrieves the following URLs related to the incident.
+
+### i. evidenceBoard
+
+### ii. investigation
+
+### iii. relatedIncidents
+
+### iv. server
+
+### v. warRoom
+
+### vi. workPlan You can use these URLs when you send notifications outside the system over email
+
+```
+demisto.debug(msg, *args)
+```
+```
+demisto.demistoUrls()
+```
+
+### or slack and would like to include a link to the incident.
+
+### Returns :
+
+### i. dict - Object contains server URLs with page as key and URL as value
+
+## demistoVersion
+
+### Retrieves server version and build number
+
+### Returns :
+
+### i. dict - Objects contains server version and build number
+
+## directMessage
+
+### (Integration only) Executes command provided in direct message to messaging bot
+
+### Arguments :
+
+### i. message str - The message sent in personal context
+
+### ii. username str - The username of the user that sent the direct message (Default value = None)
+
+### iii. email str - The email address of the user that sent the direct message (Default value = None)
+
+### iv. anyoneCanOpenIncidents bool - Whether external users can create incidents or not (Default
+
+### value = None)
+
+### Returns :
+
+### i. str - Server response to command executed in the direct message
+
+```
+demisto.demistoVersion()
+```
+```
+demisto.directMessage(message, username=None, email=None,
+anyoneCanOpenIncidents=None)
+```
+
+## dt
+
+### Extracts field from object using DT language syntax
+
+### Arguments :
+
+### i. obj dict - The object to look in for the requested field (Default value = None)
+
+### ii. trnsfrm str - The field to get value of (Default value = None)
+
+### Returns :
+
+### i. str - The field value in the object
+
+## error
+
+### Prints a message to the server logs in error level
+
+### Arguments :
+
+### i. msg str - The message to be logged
+
+### ii. args dict - Additional arguments to log
+
+### Returns :
+
+### i. None - No data returned
+
+## executeCommand
+
+```
+demisto.dt(obj=None, trnsfrm=None)
+```
+```
+demisto.error(msg, *args)
+```
+```
+demisto.executeCommand(command, args)
+```
+
+### (Script only) Executes given integration command / script and arguments
+
+### Arguments :
+
+### i. command str - Integration command name or script name to run
+
+### ii. args dict - Integration command / script arguments
+
+### Returns :
+
+### Union[dict, list]: Command execution response wrapped in Demisto entry object
+
+## findUser
+
+### (Integration only) Looks up for a user in the system
+
+### Arguments :
+
+### i. username str - The username of the user to search for (Default value = None)
+
+### ii. email str - The email address of the user to search for (Default value = None)
+
+### Returns :
+
+### i. dict - Object representing the user found
+
+## get
+
+### Extracts field value from nested object
+
+### Arguments :
+
+### i. obj dict - The object to extract the field from
+
+```
+demisto.findUser(username=None, email=None)
+```
+```
+demisto.get(obj, field, defaultParam=None)
+```
+
+### ii. field str - The field to extract from the object, given in dot notation
+
+### iii. defaultParam object - The default value to return in case the field doesn't exist in obj
+
+### Returns :
+
+### i. str - The value of the extracted field
+
+## getAllSupportedCommands
+
+### (Script only) Retrieves all available integration commands and scripts
+
+### Returns :
+
+### i. dict - Object of all available integrations and scripts
+
+## getArg
+
+### Extracts given argument from the arguments object
+
+### Arguments :
+
+### i. arg str - Argument to get value of
+
+### Returns :
+
+### i. str - Argument value
+
+## getAutoFocusApiKey
+
+```
+demisto.getAllSupportedCommands()
+```
+```
+demisto.getArg(arg)
+```
+
+### Retrieves the AutoFocus API Key related to this Cortex XSOAR License. You can use this API Key
+
+### in all AutoFocus integrations and Feeds. This command is not available on tenants.
+
+### Returns :
+
+### i. str - String containing the API Key
+
+## getFilePath
+
+### Retrieves file path and name, given file entry ID
+
+### Arguments :
+
+### i. id str - File entry ID to get details of
+
+### Returns :
+
+### i. dict - Object contains file ID, path and name
+
+## getIndexHash
+
+### (Integration only) Retrieves the hashed value of the tenant in which ran in
+
+### Returns :
+
+### i. str - Hashed value of tenant name
+
+## getIntegrationContext
+
+```
+demisto.getAutoFocusApiKey()
+```
+```
+demisto.getFilePath(id)
+```
+```
+demisto.getIndexHash()
+```
+
+### (Integration only) Retrieves the IntegrationContext object
+
+### Returns :
+
+### i. dict - IntegrationContext object
+
+## getIntegrationContextVersioned
+
+### (Integration only) Retrieves the versioned IntegrationContext object
+
+### Arguments :
+
+### i. refresh bool - Whether to get the integration context straight from the DB and not from the
+
+### instance memory. (Default value = False) # noqa
+
+### Returns :
+
+### i. dict - IntegrationContext versioned object
+
+## getLastMirrorRun
+
+### (Integration only) Retrieves the LastMirrorRun object
+
+### Returns :
+
+### i. dict - LastMirrorRun object
+
+## getLastRun
+
+```
+demisto.getIntegrationContext()
+```
+```
+demisto.getIntegrationContextVersioned(refresh=False)
+```
+```
+demisto.getLastMirrorRun()
+```
+
+### (Integration only) Retrieves the LastRun object
+
+### Returns :
+
+### i. dict - LastRun object
+
+## getLicenseCustomField
+
+### Get a custom field from content XSOAR configuration (can only be run in system integrations)
+
+### Arguments :
+
+### i. key str - The key name inside the content object to search for.
+
+### Returns :
+
+### i. str - the value stored in content object that matced the given key.
+
+## getLicenseID
+
+### Retrieves the ID of the license used in the server
+
+### Returns :
+
+### i. str - The license ID
+
+## getParam
+
+```
+demisto.getLastRun()
+```
+```
+demisto.getLicenseCustomField(key)
+```
+```
+demisto.getLicenseID()
+```
+```
+demisto.getParam(param)
+```
+
+### (Integration only) Extracts given parameter from the integration parameters object
+
+### Arguments :
+
+### i. param str - Integration parameter to get value of
+
+### Returns :
+
+### i. str - Integration parameter value
+
+## gets
+
+### Extracts field value from nested object
+
+### Arguments :
+
+### i. obj dict - The object to extract the field from
+
+### ii. field str - The field to extract from the object, given in dot notation
+
+### Returns :
+
+### i. str - The value of the extracted field
+
+## handleEntitlementForUser
+
+### (Integration only) Sends request to server to process entitlement response given from messaging
+
+### client
+
+### Arguments :
+
+### i. incidentID str - The incident ID in which the question was sent in
+
+```
+demisto.gets(obj, field)
+```
+```
+demisto.handleEntitlementForUser(incidentID, guid, email, content, taskID="")
+```
+
+### ii. guid str - The entitlement UUID which identifies the question
+
+### iii. email str - The email address of the user that responded
+
+### iv. content str - The content of the response
+
+### v. taskID str - The playbook task ID to mark as complete (Default value = "")
+
+### Returns :
+
+### i. None - No data returned
+
+## incident
+
+### Retrieves the current incident and all its fields (e.g. name, type). The incident custom fields will be
+
+### populated as a dict under the CustomFields attribute (for example the filename custom field
+
+### can be retrieved using demisto.incident()['CustomFields'].get('filename')).
+
+### demisto.incident gets the data from the script on the beginning of the execution, hence if updating
+
+### the incident context during script execution, it won't be reflected when calling demisto.incident,
+
+### which will return stale context data.
+
+### Returns :
+
+### i. dict - dict representing an incident object
+
+## incidents
+
+### In script, retrieves the Incidents list from the context In integration, used to return incidents to the
+
+### server.
+
+### Arguments :
+
+### i. incidents list - In integration only, list of incident objects (Default value = None).
+
+```
+demisto.incident()
+```
+```
+demisto.incidents(incidents=None)
+```
+
+### Returns :
+
+### i. list - List containing the current incident object.
+
+## info
+
+### Prints a message to the server logs in info level
+
+### Arguments :
+
+### i. msg str - The message to be logged
+
+### ii. args dict - Additional arguments to log
+
+### Returns :
+
+### i. None - No data returned
+
+## initialize
+
+### Runs some initializations to the demisto object. Should not be used in integration code
+
+## integrationInstance
+
+### (Integration only) Retrieves the integration instance name in which ran in
+
+### Returns :
+
+```
+demisto.info(msg,*args)
+```
+```
+demisto.initialize()
+```
+```
+demisto.integrationInstance()
+```
+
+### i. str - The integration instance name
+
+## internalHttpRequest
+
+### Run an internal HTTP request to the XSOAR server. The request runs with the permissions of the
+
+### executing user, when a command is being executed manually (such as via the War Room or when
+
+### browsing a widget). When run via a playbook, will run with a readonly user with limited permissions
+
+### isolated to the current incident only. Available for both Integrations and Scripts starting from Server
+
+### version 6.1.
+
+### Arguments :
+
+### i. method str - HTTP method such as: GET or POST
+
+### ii. uri str - Server uri to request. For example: "/contentpacks/marketplace/HelloWorld". body
+
+### Optional[str]: Optional body for a POST request. Defaults to None.
+
+### Returns :
+
+### i. dict - dict cotainnig the following fields:
+
+### i. statusCode (int): HTTP status code such as 200
+
+### ii. status (str): HTTP status line such as: "200 OK"
+
+### iii. body (str): response body
+
+### iv. headers (dict): dict of headers. Each key is a header name with an array of values. For
+
+### example: "headers": {"Content-Type": ["text/plain; charset=utf-8"]}
+
+## investigation
+
+### Retrieves the ID of the investigation in which being run in
+
+### Returns :
+
+```
+demisto.internalHttpRequest(method, uri, body=None)
+```
+```
+demisto.investigation()
+```
+
+### i. dict - Object contains the investigation ID
+
+## isTimeSensitive
+
+### This function will indicate whether the command reputation (auto-enrichment) is called as auto-
+
+### extract=inline. So for default the function return False.
+
+## log
+
+### Prints a message to the current incidents war room log
+
+### Arguments :
+
+### i. msg str - The message to be logged
+
+### Returns :
+
+### i. None - No data returned
+
+## mapObject
+
+### Mapping an object using chosen mapper
+
+### Returns :
+
+### i. dict - the obj after mapping
+
+```
+demisto.isTimeSensitive()
+```
+```
+demisto.log(msg)
+```
+```
+demisto.mapObject(obj, mapper, mapper_type)
+```
+
+## mirrorInvestigation
+
+### (Integration only) Marks an investigation as mirrored
+
+### Arguments :
+
+### i. id str - Incident ID to mirror
+
+### ii. mirrorType str - Contains mirror type and mirror direction separated by colon, e.g. all:both
+
+### iii. autoClose bool - Whether to close the investigation when the mirrored channel is closed/
+
+### archived (Default value = False)
+
+### Returns :
+
+### i. None - No data returned
+
+## params
+
+### (Integration only) Retrieves the integration parameters object
+
+### Returns :
+
+### i. dict - Integrations parameters object
+
+## parentEntry
+
+### Retrieves information regarding the war room entry from which the method runs
+
+```
+demisto.mirrorInvestigation(id, mirrorType, autoClose=False)
+```
+```
+demisto.params()
+```
+```
+demisto.parentEntry()
+```
+
+### Returns :
+
+### i. dict - information regarding the current war room entry
+
+## results
+
+### Outputs entries to the war-room
+
+### Arguments :
+
+### i. results Union[list, dict] - The entry object or array of entry objects to output
+
+### Returns :
+
+### i. None - No data returned
+
+### An example of results argument:
+
+## searchIndicators
+
+### Searches for indicators according to given query. If using Elasticsearch with Cortex XSOAR 6.1 or
+
+```
+demisto.results(results)
+```
+#### {
+
+```
+Type: EntryType.NOTE,
+Contents: data,
+ContentsFormat: EntryFormat.JSON,
+HumanReadable: md,
+ReadableContentsFormat: EntryFormat.MARKDOWN,
+EntryContext: context,
+Tags: [tag1, tag2]
+}
+```
+```
+demisto.searchIndicators(fromDate='', query='', size= 100 , page= 0 , toDate='',
+value='', searchAfter=None, populateFields=None, **kwargs)
+```
+
+### later, the searchAfter argument must be used instead of the page argument.
+
+### Arguments :
+
+### i. fromdate str - The start date to search from (Default value = '')
+
+### ii. query str - Indicator search query (Default value = '')
+
+### iii. size int - Limit the number of returned results (Default value = 100)
+
+### iv. page int - Response paging (Default value = 0)
+
+### v. todate str - The end date to search until to (Default value = '')
+
+### vi. value str - The indicator value to search (Default value = '')
+
+### vii. searchAfter list - Use the last searchIndicators() outputs for search batch (Default value =
+
+### None)
+
+### viii. populateFields str - Comma separated fields to filter (e.g. "value,type")
+
+### Returns :
+
+### i. dict - Object contains the search results
+
+### You can searchIndicators one batch at a time, without needing to load all indicators at once, by
+
+### adding the argument searchAfter after the demisto.executeCommand. When you run a search
+
+### for the query type:IP, the return value includes searchAfter
+
+### You can then use the returned value of searchAfter to iterate over all batches.
+
+```
+>>> demisto.executeCommand(searchIndicators, "query": 'type:IP', "size" :1000})
+{
+"iocs": [],
+"searchAfter": [1596106239679, dd7aa6abfcb3adf793922618005b2ad5],
+"total": 7432
+}
+```
+```
+>>> res = demisto.executeCommand("searchIndicators", {"query" : 'type:IP', "size" :
+1000})
+>>> search_after_title = 'searchAfter'
+>>> while search_after_title in res and res[search_after_title] is not None:
+>>> demisto.results(res)
+>>> res = demisto.executeCommand("searchIndicators",
+>>> {"query" : 'type:IP', "size" : 1000,
+"searchAfter" : res[search_after_title]})
+```
+
+## searchRelationships
+
+### Retrieves Indicators Relationship data according to given filters.
+
+### Arguments :
+
+### i. args dict - The relationships filter object. A dictionary with the following keys:
+
+### i. size (int)
+
+### ii. relationshipNames (List[str])
+
+### iii. entities (List[str])
+
+### iv. entityTypes (List[str])
+
+### v. excludedEntities (List[str])
+
+### vi. query (str)
+
+### vii. fromDate (str)
+
+### viii. toDate (str)
+
+### ix. searchAfter (List[str])
+
+### x. searchBefore (List[str])
+
+### xi. sort (List[Dict[str, Any]])
+
+### Returns :
+
+### i. (dict) - The Relationship Search response.
+
+### Example (partial results):
+
+```
+demisto.searchRelationships(args)
+```
+```
+>>> demisto.searchRelationships({"entities": ["8.8.8.8", "google.com"], "size": 2})
+{
+"total": 2,
+"data": [
+{
+"id": "27",
+"entityA": "8.8.8.8",
+"entityAFamily": "Indicator",
+"entityAType": "IP",
+"name": "contains",
+"reverseName": "part-of",
+```
+
+## setAssetsLastRun
+
+```
+"entityB": "1.1.1.1",
+"entityBFamily": "Indicator",
+"entityBType": "IP",
+"type": "IndicatorToIndicator",
+"createdInSystem": "2022-04-04T16:29:04.417942+03:00",
+"sources": [
+{
+"reliability": "C - Fairly reliable",
+}
+]
+},
+{
+"id": "26",
+"entityA": "google.com",
+"entityAFamily": "Indicator",
+"entityAType": "Domain",
+"name": "related-to",
+"reverseName": "related-to",
+"entityB": "bing.com",
+"entityBFamily": "Indicator",
+"entityBType": "Domain",
+"type": "IndicatorToIndicator",
+"createdInSystem": "2022-04-04T16:23:39.863033+03:00",
+"updatedInSystemBySource": "2022-04-04T16:23:39.862853+03:00",
+"sources": [
+{
+"reliability": "C - Fairly reliable",
+}
+]
+}
+],
+"SearchAfter": [
+" \u0001\u0016q-\u0006`Uy'p",
+"26"
+],
+"SearchBefore": [
+" \u0001\u0016q-\u0012\u0001\u0004n\u0013p",
+"27"
+]
+}
+```
+
+### (Integration only) Stores given object in the AssetsLastRun object
+
+### Arguments :
+
+### i. obj dict - The object to store
+
+### Returns :
+
+### i. None - No data returned
+
+## setContext
+
+### (Script only) Sets given value in path in the context data
+
+### Arguments :
+
+### i. contextPath str - The context data path to set the value in
+
+### ii. value str - The value to set in the context data path
+
+### Returns :
+
+### i. dict - Object contains operation result status
+
+## setIntegrationContext
+
+### (Integration only) Stores given object in the IntegrationContext object
+
+### Arguments :
+
+### i. context dict - The object to store
+
+### Returns :
+
+```
+demisto.setAssetsLastRun(obj)
+```
+```
+demisto.setContext(contextPath, value)
+```
+```
+demisto.setIntegrationContext(context)
+```
+
+### i. None - No data returned
+
+## setIntegrationContextVersioned
+
+### (Integration only) Stores given object in the IntegrationContext object in given version
+
+### Arguments :
+
+### i. context dict - The object to store
+
+### ii. version int - The context version to set. If the version is older than the current, an error will be
+
+### thrown. (Default value = -1) # noqa
+
+### iii. sync bool - Whether to save the context to the DB right away. If false, the context will be
+
+### saved at the end of the command. (Default value = False)
+
+### Returns :
+
+### i. None - No data returned
+
+## setLastMirrorRun
+
+### (Integration only) Stores given object in the LastMirrorRun object
+
+### Arguments :
+
+### i. obj dict - The object to store
+
+### Returns :
+
+### i. None - No data returned
+
+```
+demisto.setIntegrationContextVersioned(context, version=- 1 , sync=False)
+```
+```
+demisto.setLastMirrorRun(obj)
+```
+
+## setLastRun
+
+### (Integration only) Stores given object in the LastRun object
+
+### Arguments :
+
+### i. obj dict - The object to store
+
+### Returns :
+
+### i. None - No data returned
+
+## uniqueFile
+
+### Generate a unique file name based upon a random UUID
+
+### Returns :
+
+### i. str - Random UUID
+
+## updateModuleHealth
+
+### (Integration only) Updated integration module health with given message
+
+### Arguments :
+
+### i. data Union[str, dict] - Either the message to display in the integration module health, or a
+
+### dictionary containing the "eventsPulled" field (number).
+
+```
+demisto.setLastRun(obj)
+```
+```
+demisto.uniqueFile()
+```
+```
+demisto.updateModuleHealth(data, is_error=False)
+```
+
+### ii. is_error bool - Whether or not to display it as an error message in the fetch history.
+
+### Returns :
+
+### i. None - No data returned
+
+### Edit this page
+
+```
+Report an Issue
+```
+
